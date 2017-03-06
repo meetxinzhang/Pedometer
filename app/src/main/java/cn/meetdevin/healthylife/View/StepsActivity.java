@@ -136,6 +136,4 @@ public class StepsActivity extends Activity {
         context.startActivity(intent);
     }
 
-
-
 }
