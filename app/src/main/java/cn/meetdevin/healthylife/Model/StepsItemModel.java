@@ -1,32 +1,23 @@
 package cn.meetdevin.healthylife.Model;
 
-import java.sql.Date;
-
 /**
  * Created by XinZh on 2017/3/8.
  */
 
-public class MyStepsModel {
-    private String date;
+public class StepsItemModel {
     private int steps;
     private int minutes;
     private float distance;
 
-    public MyStepsModel(String date, int totalSteps, int totalMinutes, float totalDistance){
-        this.date = date;
+    public StepsItemModel(int totalSteps, int totalMinutes){
         this.steps = totalSteps;
         this.minutes = totalMinutes;
-        this.distance = totalDistance;
     }
 
-    public MyStepsModel(int steps, int minutes, float distance){
-        this.steps = steps;
+    public StepsItemModel(int totalSteps, int totalMinutes, int distance){
+        this.steps = totalSteps;
+        this.minutes = totalMinutes;
         this.distance = distance;
-        this.minutes = minutes;
-    }
-
-    public String getTheDate() {
-        return date;
     }
 
     public float getDistance() {
@@ -39,10 +30,6 @@ public class MyStepsModel {
 
     public int getSteps() {
         return steps;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
     }
 
     public void setDistance(float distance) {

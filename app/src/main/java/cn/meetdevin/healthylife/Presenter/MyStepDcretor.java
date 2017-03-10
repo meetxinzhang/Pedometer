@@ -65,8 +65,12 @@ public class MyStepDcretor implements SensorEventListener {
     float minValue = 11f;
     float maxValue = 19.6f;
 
-    //0-准备计时   1-计时中   2-正常计步中
-    private int CountTimeState = 0;
+    /**
+     * 计步状态
+     * 0-未计步   1-预备计步，计时中   2-正常计步中，存储
+     */
+    private int pedometerState = 0;
+    //步数
     public static int CURRENT_SETP = 0;
     public static int TEMP_STEP = 0;
     private int lastStep = -1;
@@ -82,7 +86,10 @@ public class MyStepDcretor implements SensorEventListener {
     OnSensorChangeListener onSensorChangeListener;
 
     public interface OnSensorChangeListener {
-        void onChange(int steps);
+        //当步数改变时,通知外部更新UI
+        void onStepsListenerChange(int steps);
+        //当计步状态改变时，通知外部是否存储
+        void onPedometerStateChange(int pedometerState);
     }
 
     //获取接口对象
@@ -98,8 +105,9 @@ public class MyStepDcretor implements SensorEventListener {
 
 
     //构造函数
-    public MyStepDcretor() {
+    public MyStepDcretor(int newSteps) {
         super();
+        CURRENT_SETP = newSteps;
     }
 
     /**
@@ -135,10 +143,10 @@ public class MyStepDcretor implements SensorEventListener {
 
     /**
      * 侦测步子，并开始计步
-	 * 1.传入sersor中的数据
-	 * 2.如果检测到了波峰，并且符合时间差以及阈值的条件，则判定为1步
-	 * 3.符合时间差条件，波峰波谷差值大于initialValue，则将该差值纳入阈值的计算中
-	 */
+     * 1.传入sersor中的数据
+     * 2.如果检测到了波峰，并且符合时间差以及阈值的条件，则判定为1步
+     * 3.符合时间差条件，波峰波谷差值大于initialValue，则将该差值纳入阈值的计算中
+     */
     public void detectorNewStep(float values) {
         if (lastAcceleration == 0) {
             lastAcceleration = values;
@@ -161,25 +169,6 @@ public class MyStepDcretor implements SensorEventListener {
             }
         }
         lastAcceleration = values;
-    }
-
-    private void preStep() {
-        if (CountTimeState == 0) {
-            // 开启计时器
-            timeCount = new TimeCount(duration, 700);
-            timeCount.start();
-            CountTimeState = 1;
-            Log.v(TAG, "开启计时器");
-        } else if (CountTimeState == 1) {
-            TEMP_STEP++;
-            Log.v(TAG, "计步中 TEMP_STEP:" + TEMP_STEP);
-        } else if (CountTimeState == 2) {
-            CURRENT_SETP++;
-            if (onSensorChangeListener != null) {
-                //调用接口向外传递信息
-                onSensorChangeListener.onChange(CURRENT_SETP);
-            }
-        }
     }
 
     /**
@@ -207,7 +196,7 @@ public class MyStepDcretor implements SensorEventListener {
             isDirectionUp = false;
         }
 
-        Log.v(TAG, "oldValue:" + oldValue);
+       // Log.v(TAG, "oldValue:" + oldValue);
         if (!isDirectionUp && lastStatus
                 && (continueUpFormerCount >= 2 && (oldValue >= minValue && oldValue < maxValue))) {
             peakOfWave = oldValue;
@@ -272,6 +261,27 @@ public class MyStepDcretor implements SensorEventListener {
         return ave;
     }
 
+    private void preStep() {
+        if (pedometerState == 0) {
+            // 开启计时器
+            timeCount = new TimeCount(duration, 700);
+            timeCount.start();
+            pedometerState = 1;
+            //通知外部计步预备中
+            onSensorChangeListener.onPedometerStateChange(pedometerState);
+            Log.v(TAG, "开启计时器");
+        } else if (pedometerState == 1) {
+            TEMP_STEP++;
+            Log.v(TAG, "计步中 TEMP_STEP:" + TEMP_STEP);
+        } else if (pedometerState == 2) {
+            CURRENT_SETP++;
+            if (onSensorChangeListener != null) {
+                //调用接口向外传递信息
+                onSensorChangeListener.onStepsListenerChange(CURRENT_SETP);
+            }
+        }
+    }
+
     /**
      * 自定义计时器类，复写onFinish()和onTick()方法
      */
@@ -294,7 +304,8 @@ public class MyStepDcretor implements SensorEventListener {
                 public void run() {
                     if (lastStep == CURRENT_SETP) {
                         timer.cancel();
-                        CountTimeState = 0;
+                        pedometerState = 0;
+                        onSensorChangeListener.onPedometerStateChange(pedometerState);
                         lastStep = -1;
                         TEMP_STEP = 0;
                         Log.v(TAG, "停止计步：" + CURRENT_SETP);
@@ -304,7 +315,8 @@ public class MyStepDcretor implements SensorEventListener {
                 }
             };
             timer.schedule(task, 0, 2000);
-            CountTimeState = 2;
+            pedometerState = 2;
+            onSensorChangeListener.onPedometerStateChange(pedometerState);
         }
 
         @Override
@@ -312,7 +324,8 @@ public class MyStepDcretor implements SensorEventListener {
             if (lastStep == TEMP_STEP) {
                 Log.v(TAG, "onTick 计时停止");
                 timeCount.cancel();
-                CountTimeState = 0;
+                pedometerState = 0;
+                onSensorChangeListener.onPedometerStateChange(pedometerState);
                 lastStep = -1;
                 TEMP_STEP = 0;
             } else {
