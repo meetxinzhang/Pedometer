@@ -13,6 +13,8 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.widget.TextView;
 
+import cn.meetdevin.healthylife.Dao.StepsDBHandler;
+import cn.meetdevin.healthylife.Model.TodayStepsModel;
 import cn.meetdevin.healthylife.Presenter.PedometerService;
 import cn.meetdevin.healthylife.R;
 import cn.meetdevin.healthylife.RegisterCallback;
@@ -25,6 +27,7 @@ import cn.meetdevin.healthylife.StepsChangeCallback;
  */
 
 public class StepsActivity extends Activity {
+    private final String TAG = "StepsActivity";
     //View
     TextView showSteps_t;
     Handler handler = new Handler(){
@@ -40,11 +43,34 @@ public class StepsActivity extends Activity {
 
     //Properties
     final int STEPS_MESSAGE = 7;
-    int couter;//步数
+    int stepsOfThisTime;
+    int stepsOfToday;
+    int minutesOfToday;
     boolean isBind = false; //是否和服务绑定
 
     //Interface
+    //服务控制客户端的回调接口
+    private StepsChangeCallback callback = new StepsChangeCallback.Stub() {
+
+        @Override
+        public void onStepsChange(int steps) throws RemoteException {
+            stepsOfThisTime = steps;
+            Log.d(TAG, "onStepsChange: "+steps +"zg:"+stepsOfToday);
+            upDateSteps(stepsOfThisTime + stepsOfToday);
+        }
+
+        @Override
+        public void onFinishStepsItem() throws RemoteException {
+            //从数据库获取更新
+            StepsDBHandler stepsDBHandler = new StepsDBHandler();
+            TodayStepsModel todayStepsModel = stepsDBHandler.getTodaySteps();
+            stepsOfToday = todayStepsModel.getTodayTotalSteps();
+        }
+    };
+
+    //客户端控制服务器的stub接口对象
     private RegisterCallback registerCallback;
+
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -69,15 +95,6 @@ public class StepsActivity extends Activity {
         }
     };
 
-    //服务回调接口
-    private StepsChangeCallback callback = new StepsChangeCallback.Stub() {
-        @Override
-        public void onStepsChange(int steps) throws RemoteException {
-            couter = steps;
-            upDateData();
-        }
-    };
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -97,13 +114,13 @@ public class StepsActivity extends Activity {
     }
 
     //更新UI
-    private void upDateData(){
+    private void upDateSteps(int newSteps){
 //        Toast.makeText(this,couter,Toast.LENGTH_SHORT).show();
         Message msg = new Message();
         msg.what = STEPS_MESSAGE;
-        msg.obj = couter;
+        msg.obj = newSteps;
         handler.sendMessage(msg);
-        Log.d("StepsActivity",Integer.toString(couter));
+        Log.d(TAG,Integer.toString(newSteps));
     }
 
 
@@ -112,7 +129,7 @@ public class StepsActivity extends Activity {
         Intent intent = new Intent(this, PedometerService.class);
         bindService(intent, connection, BIND_AUTO_CREATE);
         isBind = true;
-        Log.d("StepsActivity", "绑定服务");
+        Log.d(TAG, "bindPedomaterService");
     }
 
     //解绑远程服务
@@ -125,8 +142,10 @@ public class StepsActivity extends Activity {
                 e.printStackTrace();
             }
             registerCallback = null;
-            Log.d("StepsActivity", "解绑服务");
+            Log.d(TAG, "unBindPedomaterService");
         }
+        stepsOfToday = 0;
+        stepsOfThisTime = 0;
         isBind = false;
     }
 

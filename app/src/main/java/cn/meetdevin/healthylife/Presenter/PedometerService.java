@@ -15,6 +15,9 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+
 import cn.meetdevin.healthylife.Dao.StepsDBHandler;
 import cn.meetdevin.healthylife.Model.StepsItemModel;
 import cn.meetdevin.healthylife.Model.TodayStepsModel;
@@ -37,30 +40,40 @@ import cn.meetdevin.healthylife.config.MyApplication;
  */
 
 public class PedometerService extends Service implements MyStepDcretor.OnSensorChangeListener {
-    StepsItemModel stepsItemModel;
-    TodayStepsModel todayStepsModel;
-    long millis;
+    private final String TAG = "PedometerService";
+    private final int upDateSteps = 0;
+    private final int upDateToday = 1;
 
-    StepsDBHandler stepsDBHandler;
+    private StepsItemModel stepsItemModel;//本次计步
+    private TodayStepsModel todayStepsModel;//今日计步
+    private long millis;//用于计算一次计步过程的持续时间
+    int i = 0;
 
-    //Android AIDL 扩展类
-    public RemoteCallbackList<StepsChangeCallback> callbackList = new RemoteCallbackList();
+    private StepsDBHandler stepsDBHandler;
 
-    SensorManager sensorManager;
+    private SensorManager sensorManager;
     //自定义的加速度传感器监听
-    MyStepDcretor myStepDcretor;
+    private MyStepDcretor myStepDcretor;
 
     /**
+     * Android AIDL 接口描述语言，实现IPC 进程间通信
      * 实现接口：给客户端的Stub，Stub继承自Binder，它实现了IBinder接口
-     * 两个方法，分别用于注册/反注册 StepsChangeCallback 接口给 RemoteCallbackList
-     * 这两个接口方法用于注册StepsChangeCallback对象
+     * 两个方法分别用于注册/反注册 StepsChangeCallback 对象给 RemoteCallbackList
      * 参考：http://blog.csdn.net/goodlixueyong/article/details/50299963
      * 和http://www.race604.com/communicate-with-remote-service-3/
      */
+    public RemoteCallbackList<StepsChangeCallback> callbackList = new RemoteCallbackList();
+
     public RegisterCallback.Stub mBinder = new RegisterCallback.Stub() {
         @Override
         public void registerStepsChangeCallback(StepsChangeCallback callback) throws RemoteException {
             callbackList.register(callback);
+            //绑定时便更新UI，注意顺序不能反
+            todayStepsModel = stepsDBHandler.getTodaySteps();
+            recoveryTemp();
+
+            upDateUI(upDateToday);
+            upDateUI(upDateSteps);
         }
         @Override
         public void unRegisterStepsChangeCallback(StepsChangeCallback callback) throws RemoteException {
@@ -79,19 +92,17 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
      */
     @Override
     public IBinder onBind(Intent intent) {
-        //Stub其实就是IBinder的子类
+        //Stub其实就是IBinder的子类，此客户端可通过此对象控制服务
         return mBinder;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("Service","onCreate");
+        Log.d(TAG,"onCreate");
         //初始化数据
         stepsDBHandler = new StepsDBHandler();
-        stepsItemModel = recoveryData();
-        todayStepsModel = stepsDBHandler.getTodaySteps();
-        upDateUI();
+        recoveryTemp();
 
         //发送定时广播唤醒自己
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -126,7 +137,7 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
 //                    }
 //                }
                 //注册加速度传感器和监听,并且从本地存储初始化步数
-                myStepDcretor = new MyStepDcretor(0);
+                myStepDcretor = new MyStepDcretor(stepsItemModel.getSteps());
 
                 sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
                 Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -139,12 +150,13 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        recoveryTemp();
         /**
          * 如果service进程被kill掉，保留service的状态为开始状态，但不保留递送的intent对象。
          * 随后系统会尝试重新创建service，由于服务状态为开始状态，所以创建服务后一定会调用onStartCommand(Intent,int,int)方法。
          * 如果在此期间没有任何启动命令被传递到service，那么参数Intent将为null
          */
-        Log.d("Service","onStart");
+        Log.d(TAG,"onStart");
         return START_STICKY;//super.onStartCommand(intent, flags, startId);
     }
 
@@ -155,8 +167,7 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
         callbackList.kill();
         //存储临时数据
         tempSave(stepsItemModel);
-        Log.d("Service","服务结束");
-
+        Log.d(TAG,"onDestroy");
         //发送定时广播唤醒自己
 //        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 //        int anHour = 60*1000; //一分钟
@@ -167,56 +178,73 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
     }
 
     /**
-     * 接口 MyStepDcretor.OnSensorChangeListener 中定义的方法
+     * 以下两个方法都为：
+     *  接口 MyStepDcretor.OnSensorChangeListener 中定义的方法
+     *  @onStepsListenerChange 当步数改变时
+     *  @onPedometerStateChange 当计步状态改变时
      */
     @Override
     public void onStepsListenerChange(int steps) {
-        Log.d("Service","steps: "+steps);
+        Log.d(TAG,"steps: "+steps + " ,"+"TodaySteps: "+todayStepsModel.getTodayTotalSteps());
         stepsItemModel.setSteps(steps);
-        upDateUI();
+
+        if(i++ == 20){
+            //new
+            int d = (int) ((System.currentTimeMillis() - millis)/1000/60);
+            stepsItemModel.setMinutes(d);
+            tempSave(stepsItemModel);
+        }
+        upDateUI(upDateSteps);
     }
 
     @Override
     public void onPedometerStateChange(int pedometerState) {
         //Toast.makeText(MyApplication.getContext()," "+pedometerState,Toast.LENGTH_SHORT).show();
-        Log.d("Service","onPedometerStateChange:"+pedometerState);
-        if(pedometerState == 1){
+        Log.d(TAG,"onPedometerStateChange:" + pedometerState);
+        if(pedometerState == 2){
+            //开始计步
+            SimpleDateFormat dateFormat = new SimpleDateFormat("hh-mm-ss");
+            Date date = new Date(System.currentTimeMillis());
+            String s = dateFormat.format(date);
+
             millis = System.currentTimeMillis();
+            stepsItemModel.setStartDate(s);
         }
         if(pedometerState == 0){
-            //存储一次计步数据
-            int d = (int) ((System.currentTimeMillis() - millis)/1000/60);
-            stepsItemModel.setMinutes(d);
+            //计步结束存储一次计步数据
+//            //临时SharedPreferences存储
+//            tempSave(stepsItemModel);
+            //插入今日表
             stepsDBHandler.insertToday(stepsItemModel);
+            Log.d(TAG,"onPedometerStateChange: 记录了一次持续"+stepsItemModel.getMinutes()+"分钟的运动");
 
-            Log.d("Service","onPedometerStateChange: 记录了一次持续"+d+"分钟的运动");
+            stepsItemModel.clean();
+            todayStepsModel = stepsDBHandler.getTodaySteps();
+            //通知UI更新今日数据
+            upDateUI(upDateToday);
+            upDateUI(upDateSteps);
             //Toast.makeText(MyApplication.getContext(),"记录了一次持续"+d+"分钟的运动",Toast.LENGTH_LONG).show();
         }
     }
 
-//    /**
-//     * 计步过程中每50步存储一次
-//     * 感觉没必要
-//     */
-//    private void isSave(){
-//        i++;
-//        if(i==50){
-//            //存储
-//
-//            i = 0;
-//        }
-//    }
 
     /**
-     *  更新UI
+     *  更新 UI
      *  回调StepsChangeCallback.aidl 接口，向客户端(UI)传递数据
      */
-    private void upDateUI(){
+    private void upDateUI(int flag){
         int len = callbackList.beginBroadcast();
         //回调给所有绑定的客户端
         for (int i =0;i< len;i++){
             try {
-                callbackList.getBroadcastItem(i).onStepsChange(stepsItemModel.getSteps());
+                switch (flag){
+                    case upDateSteps:
+                        callbackList.getBroadcastItem(i).onStepsChange(stepsItemModel.getSteps());
+                        break;
+                    case upDateToday:
+                        callbackList.getBroadcastItem(i).onFinishStepsItem();
+                        break;
+                }
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
@@ -224,32 +252,35 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
         callbackList.finishBroadcast();
     }
 
+
+
     /**
-     * 临时数据存储
+     * 存储本次计步过程
      */
-    private void tempSave(StepsItemModel myStepsModel){
+    private void tempSave(StepsItemModel stepsItemModel){
         SharedPreferences.Editor editor = getSharedPreferences("tempStepsData",MODE_PRIVATE).edit();
-        editor.putInt("tempSteps",myStepsModel.getSteps());
-        editor.putInt("tempMinutes",myStepsModel.getMinutes());
+        editor.putInt("tempSteps",stepsItemModel.getSteps());
+        editor.putString("tempStartDate",stepsItemModel.getStartDate());
+        editor.putInt("tempMinutes",stepsItemModel.getMinutes());
         editor.commit();
     }
 
     /**
-     * 服务重启时恢复数据
+     * 恢复本次计步过程
      */
-    private StepsItemModel recoveryData(){
-        StepsItemModel myStepsModel;
+    private void recoveryTemp(){
+        //恢复本次计步过程
         try {
             SharedPreferences pref = getSharedPreferences("tempStepsData", MODE_PRIVATE);
-            myStepsModel = new StepsItemModel(
+            stepsItemModel = new StepsItemModel(
                     pref.getInt("tempSteps",0),
+                    pref.getString("tempStartDate","null"),
                     pref.getInt("tempMinutes",0));
             pref.edit().clear();//清除数据
-            return myStepsModel;
+            Log.d(TAG, "recoveryData: success! ");
         }catch (Exception e){
-            Log.d("Service", "recoveryData: exception ");
-            return new StepsItemModel(0,0);
+            Log.d(TAG, "recoveryData: exception! ");
+            stepsItemModel = new StepsItemModel(0,"null",0);
         }
     }
-
 }

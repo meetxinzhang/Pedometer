@@ -12,12 +12,13 @@ public class TodayStepsModel {
 
     int todayTotalSteps;
     int todayTotalMinutes;
-    String date;
+    //date
+    int myDate[];
 
-    public TodayStepsModel(String date, int todayTotalSteps,int todayTotalMinutes){
+    public TodayStepsModel(int[] myDate ,int todayTotalSteps,int todayTotalMinutes){
         list = new ArrayList<>();
 
-        this.date = date;
+        this.myDate = myDate;
         this.todayTotalSteps = todayTotalSteps;
         this.todayTotalMinutes = todayTotalMinutes;
     }
@@ -34,17 +35,35 @@ public class TodayStepsModel {
         return list;
     }
 
-    public int getTodayTotalSteps() {
+    public int countTodayTotalSteps() {
+        todayTotalSteps = 0;
         for (int i=0;i<list.size();i++){
             todayTotalSteps += list.get(i).getSteps();
         }
         return todayTotalSteps;
     }
 
-    public int getTodayTotalMinutes() {
+    public int countTodayTotalMinutes() {
+        todayTotalMinutes = 0;
         for (int i=0;i<list.size();i++){
             todayTotalMinutes += list.get(i).getMinutes();
         }
         return todayTotalMinutes;
+    }
+
+    public int getTodayTotalMinutes() {
+        return todayTotalMinutes;
+    }
+
+    public int getTodayTotalSteps() {
+        return todayTotalSteps;
+    }
+
+    public void setMyDate(int[] myDate) {
+        this.myDate = myDate;
+    }
+
+    public int[] getMyDate() {
+        return myDate;
     }
 }

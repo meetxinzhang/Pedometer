@@ -22,6 +22,7 @@ public class MyStepsDatabaseHelper extends SQLiteOpenHelper{
             + "id integer primary key autoincrement, "
             + "steps integer, "
             + "distance real, "
+            + "startDate text, "
             + "minutes integer)";
 
 
@@ -36,15 +37,6 @@ public class MyStepsDatabaseHelper extends SQLiteOpenHelper{
         db.execSQL(CREATE_TABLE_TODAY);
         Log.d("MyStepsDatabaseHelper", "onCreate: 数据库创建成功");
     }
-
-    /**
-     * 每日更新
-     */
-    public void upDateEveryDay(SQLiteDatabase db){
-        db.execSQL("drop table if exists Today");
-        db.execSQL(CREATE_TABLE_TODAY);
-    }
-
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

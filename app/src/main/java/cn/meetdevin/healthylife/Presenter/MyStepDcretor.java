@@ -263,7 +263,7 @@ public class MyStepDcretor implements SensorEventListener {
 
     private void preStep() {
         if (pedometerState == 0) {
-            // 开启计时器
+            // 开启计时器,duration 秒倒计时，每次间隔700毫秒
             timeCount = new TimeCount(duration, 700);
             timeCount.start();
             pedometerState = 1;
@@ -272,7 +272,7 @@ public class MyStepDcretor implements SensorEventListener {
             Log.v(TAG, "开启计时器");
         } else if (pedometerState == 1) {
             TEMP_STEP++;
-            Log.v(TAG, "计步中 TEMP_STEP:" + TEMP_STEP);
+            Log.v(TAG, "预备计步中 TEMP_STEP:" + TEMP_STEP);
         } else if (pedometerState == 2) {
             CURRENT_SETP++;
             if (onSensorChangeListener != null) {
@@ -307,6 +307,9 @@ public class MyStepDcretor implements SensorEventListener {
                         pedometerState = 0;
                         onSensorChangeListener.onPedometerStateChange(pedometerState);
                         lastStep = -1;
+                        //-------------------------------
+                        CURRENT_SETP = 0;
+                        //-------------------------------
                         TEMP_STEP = 0;
                         Log.v(TAG, "停止计步：" + CURRENT_SETP);
                     } else {
@@ -314,11 +317,13 @@ public class MyStepDcretor implements SensorEventListener {
                     }
                 }
             };
+            //0-调用后，多久开始一次次执行run()方法,2000-以后每次间隔多久调用run()
             timer.schedule(task, 0, 2000);
             pedometerState = 2;
             onSensorChangeListener.onPedometerStateChange(pedometerState);
         }
 
+        //计时/预备计步过程，每700毫秒执行一次
         @Override
         public void onTick(long millisUntilFinished) {
             if (lastStep == TEMP_STEP) {
