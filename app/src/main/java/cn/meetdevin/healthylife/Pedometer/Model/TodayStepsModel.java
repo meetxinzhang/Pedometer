@@ -1,4 +1,4 @@
-package cn.meetdevin.healthylife.Model;
+package cn.meetdevin.healthylife.Pedometer.Model;
 
 import java.util.ArrayList;
 import java.util.List;

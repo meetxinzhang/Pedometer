@@ -1,4 +1,4 @@
-package cn.meetdevin.healthylife.View;
+package cn.meetdevin.healthylife;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,7 +6,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import cn.meetdevin.healthylife.Presenter.PedometerService;
+import cn.meetdevin.healthylife.Pedometer.Presenter.PedometerService;
+import cn.meetdevin.healthylife.Pedometer.View.PedometerActivity;
 import cn.meetdevin.healthylife.R;
 
 
@@ -27,7 +28,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.gotoSteps_b:
-                StepsActivity.actionStart(this);break;
+                PedometerActivity.actionStart(this);break;
             default:
                 break;
         }

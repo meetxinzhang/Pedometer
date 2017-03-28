@@ -1,11 +1,11 @@
-package cn.meetdevin.healthylife.Presenter;
+package cn.meetdevin.healthylife.Pedometer.Presenter;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import cn.meetdevin.healthylife.Dao.StepsDBHandler;
+import cn.meetdevin.healthylife.Pedometer.Dao.StepsDBHandler;
 
 /**
  * Created by XinZh on 2017/2/25.

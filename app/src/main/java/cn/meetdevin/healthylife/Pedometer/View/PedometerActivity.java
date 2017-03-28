@@ -1,21 +1,17 @@
-package cn.meetdevin.healthylife.View;
+package cn.meetdevin.healthylife.Pedometer.View;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.RemoteException;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.widget.TextView;
-
-import cn.meetdevin.healthylife.Dao.StepsDBHandler;
-import cn.meetdevin.healthylife.Model.TodayStepsModel;
-import cn.meetdevin.healthylife.Presenter.PedometerService;
+import cn.meetdevin.healthylife.Pedometer.Presenter.PedometerService;
 import cn.meetdevin.healthylife.R;
 import cn.meetdevin.healthylife.RegisterCallback;
 import cn.meetdevin.healthylife.StepsChangeCallback;
@@ -26,45 +22,27 @@ import cn.meetdevin.healthylife.StepsChangeCallback;
  * Created by XinZh on 2017/2/24.
  */
 
-public class StepsActivity extends Activity {
-    private final String TAG = "StepsActivity";
-    //View
-    TextView showSteps_t;
-    Handler handler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what){
-                case STEPS_MESSAGE:
-                    showSteps_t.setText(msg.obj.toString());
-            }
-        }
-    };
+public class PedometerActivity extends FragmentActivity {
+    private final String TAG = "PedometerActivity";
 
     //Properties
-    final int STEPS_MESSAGE = 7;
-    int stepsOfThisTime;
-    int stepsOfToday;
-    int minutesOfToday;
     boolean isBind = false; //是否和服务绑定
+
+    //View
+    TabLayout tabLayout;
+    ViewPagerAdapter viewPagerAdapter;
+    ViewPager viewPager;
 
     //Interface
     //服务控制客户端的回调接口
     private StepsChangeCallback callback = new StepsChangeCallback.Stub() {
-
         @Override
         public void onStepsChange(int steps) throws RemoteException {
-            stepsOfThisTime = steps;
-            Log.d(TAG, "onStepsChange: "+steps +"zg:"+stepsOfToday);
-            upDateSteps(stepsOfThisTime + stepsOfToday);
+            onActivityChangeListener.onStepsChange(steps);
         }
-
         @Override
         public void onFinishStepsItem() throws RemoteException {
-            //从数据库获取更新
-            StepsDBHandler stepsDBHandler = new StepsDBHandler();
-            TodayStepsModel todayStepsModel = stepsDBHandler.getTodaySteps();
-            stepsOfToday = todayStepsModel.getTodayTotalSteps();
+            onActivityChangeListener.onFinishStepsItem();
         }
     };
 
@@ -95,12 +73,37 @@ public class StepsActivity extends Activity {
         }
     };
 
+    //自定义的接口，实时向 Fragment 传递步数
+    OnActivityChangeListener onActivityChangeListener;
+
+    public interface OnActivityChangeListener {
+        //当步数改变时,通知外部更新UI
+        void onStepsChange(int steps);
+        //当计步状态改变时，通知外部是否存储
+        void onFinishStepsItem();
+    }
+
+    //设置监听，传入回调对象
+    public void setOnActivityChangeListener(
+            OnActivityChangeListener onActivityChangeListener) {
+        this.onActivityChangeListener = onActivityChangeListener;
+    }
+
+
+    //---------------------生命周期内方法---------------------------
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_steps);
-        showSteps_t = (TextView) findViewById(R.id.showSteps_t);
+        setContentView(R.layout.activity_pedometer);
+
+        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        viewPager = (ViewPager) findViewById(R.id.viewPager);
+        viewPagerAdapter= new ViewPagerAdapter(getSupportFragmentManager(),this);
+
+        viewPager.setAdapter(viewPagerAdapter);
+        tabLayout.setupWithViewPager(viewPager);
+        tabLayout.setTabMode(TabLayout.MODE_FIXED);
 
         //绑定服务
         bindPedomaterService();
@@ -112,17 +115,6 @@ public class StepsActivity extends Activity {
         //当activity被回收时与服务解绑
         unBindPedomaterService();
     }
-
-    //更新UI
-    private void upDateSteps(int newSteps){
-//        Toast.makeText(this,couter,Toast.LENGTH_SHORT).show();
-        Message msg = new Message();
-        msg.what = STEPS_MESSAGE;
-        msg.obj = newSteps;
-        handler.sendMessage(msg);
-        Log.d(TAG,Integer.toString(newSteps));
-    }
-
 
     //绑定远程服务
     private void bindPedomaterService() {
@@ -144,14 +136,12 @@ public class StepsActivity extends Activity {
             registerCallback = null;
             Log.d(TAG, "unBindPedomaterService");
         }
-        stepsOfToday = 0;
-        stepsOfThisTime = 0;
         isBind = false;
     }
 
     //此activity的启动方法
     public static void actionStart(Context context) {
-        Intent intent = new Intent(context, StepsActivity.class);
+        Intent intent = new Intent(context, PedometerActivity.class);
         context.startActivity(intent);
     }
 

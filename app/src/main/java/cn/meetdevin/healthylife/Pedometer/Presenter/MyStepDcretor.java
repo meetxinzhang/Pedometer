@@ -1,4 +1,4 @@
-package cn.meetdevin.healthylife.Presenter;
+package cn.meetdevin.healthylife.Pedometer.Presenter;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -77,7 +77,7 @@ public class MyStepDcretor implements SensorEventListener {
 
     private Timer timer;
     // 倒计时3.5秒，3.5秒内不会显示计步，用于屏蔽细微波动
-    private long duration = 3500;
+    private long duration = 1500;
     private TimeCount timeCount;
 
     /**
@@ -317,8 +317,8 @@ public class MyStepDcretor implements SensorEventListener {
                     }
                 }
             };
-            //0-调用后，多久开始一次次执行run()方法,2000-以后每次间隔多久调用run()
-            timer.schedule(task, 0, 2000);
+            //0-调用后，多久开始一次次执行run()方法,1000*60*2-以后每次间隔多久调用run()
+            timer.schedule(task, 0, 1000*60*2);
             pedometerState = 2;
             onSensorChangeListener.onPedometerStateChange(pedometerState);
         }

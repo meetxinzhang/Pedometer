@@ -1,4 +1,4 @@
-package cn.meetdevin.healthylife.Presenter;
+package cn.meetdevin.healthylife.Pedometer.Presenter;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -13,17 +13,16 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
-import cn.meetdevin.healthylife.Dao.StepsDBHandler;
-import cn.meetdevin.healthylife.Model.StepsItemModel;
-import cn.meetdevin.healthylife.Model.TodayStepsModel;
+import cn.meetdevin.healthylife.Pedometer.Dao.StepsDBHandler;
+import cn.meetdevin.healthylife.Pedometer.Model.StepsItemModel;
+import cn.meetdevin.healthylife.Pedometer.Model.TodayStepsModel;
 import cn.meetdevin.healthylife.RegisterCallback;
 import cn.meetdevin.healthylife.StepsChangeCallback;
-import cn.meetdevin.healthylife.config.MyApplication;
 
 /**
  * Remote Service
@@ -45,9 +44,11 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
     private final int upDateToday = 1;
 
     private StepsItemModel stepsItemModel;//本次计步
-    private TodayStepsModel todayStepsModel;//今日计步
+    //private TodayStepsModel todayStepsModel;//今日计步
     private long millis;//用于计算一次计步过程的持续时间
-    int i = 0;
+
+    Calendar calendar;
+    private int day = -1;
 
     private StepsDBHandler stepsDBHandler;
 
@@ -69,9 +70,6 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
         public void registerStepsChangeCallback(StepsChangeCallback callback) throws RemoteException {
             callbackList.register(callback);
             //绑定时便更新UI，注意顺序不能反
-            todayStepsModel = stepsDBHandler.getTodaySteps();
-            recoveryTemp();
-
             upDateUI(upDateToday);
             upDateUI(upDateSteps);
         }
@@ -150,6 +148,9 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        calendar = Calendar.getInstance();
+        day = calendar.get(Calendar.DAY_OF_MONTH);
+
         recoveryTemp();
         /**
          * 如果service进程被kill掉，保留service的状态为开始状态，但不保留递送的intent对象。
@@ -185,15 +186,13 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
      */
     @Override
     public void onStepsListenerChange(int steps) {
-        Log.d(TAG,"steps: "+steps + " ,"+"TodaySteps: "+todayStepsModel.getTodayTotalSteps());
         stepsItemModel.setSteps(steps);
 
-        if(i++ == 20){
-            //new
-            int d = (int) ((System.currentTimeMillis() - millis)/1000/60);
-            stepsItemModel.setMinutes(d);
-            tempSave(stepsItemModel);
-        }
+        int d = (int) ((System.currentTimeMillis() - millis)/1000/60);
+        stepsItemModel.setMinutes(d);
+        tempSave(stepsItemModel);
+
+        Log.d(TAG,"steps: "+steps + "time: "+ d);
         upDateUI(upDateSteps);
     }
 
@@ -203,12 +202,8 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
         Log.d(TAG,"onPedometerStateChange:" + pedometerState);
         if(pedometerState == 2){
             //开始计步
-            SimpleDateFormat dateFormat = new SimpleDateFormat("hh-mm-ss");
-            Date date = new Date(System.currentTimeMillis());
-            String s = dateFormat.format(date);
-
             millis = System.currentTimeMillis();
-            stepsItemModel.setStartDate(s);
+            stepsItemModel.setStartHour(calendar.get(Calendar.HOUR_OF_DAY));
         }
         if(pedometerState == 0){
             //计步结束存储一次计步数据
@@ -219,7 +214,6 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
             Log.d(TAG,"onPedometerStateChange: 记录了一次持续"+stepsItemModel.getMinutes()+"分钟的运动");
 
             stepsItemModel.clean();
-            todayStepsModel = stepsDBHandler.getTodaySteps();
             //通知UI更新今日数据
             upDateUI(upDateToday);
             upDateUI(upDateSteps);
@@ -227,6 +221,47 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
         }
     }
 
+    /**
+     * 存储本次计步过程
+     */
+    private void tempSave(StepsItemModel stepsItemModel){
+        SharedPreferences.Editor editor = getSharedPreferences("tempStepsData",MODE_PRIVATE).edit();
+        editor.putInt("tempSteps",stepsItemModel.getSteps());
+        editor.putInt("tempStartDate",stepsItemModel.getStartHour());
+        editor.putInt("tempMinutes",stepsItemModel.getMinutes());
+
+        Calendar calendar = Calendar.getInstance();
+        day = calendar.get(Calendar.DAY_OF_MONTH);
+        editor.putInt("day_of_month",day);
+        editor.commit();
+    }
+
+    /**
+     * 恢复本次计步过程
+     */
+    private void recoveryTemp(){
+        //恢复本次计步过程
+        try {
+            SharedPreferences pref = getSharedPreferences("tempStepsData", MODE_PRIVATE);
+            if(day == pref.getInt("day_of_month",-1)){
+                stepsItemModel = new StepsItemModel(
+                        pref.getInt("tempSteps",0),
+                        pref.getInt("tempStartHour",0),
+                        pref.getInt("tempMinutes",0));
+                pref.edit().clear();//清除数据
+                Log.d(TAG, "recoveryData: success! ");
+            }else {
+                pref.edit().clear();
+                stepsDBHandler.insertFormerTodays();
+                stepsItemModel = new StepsItemModel(0,0,0);
+                upDateUI(upDateToday);
+                upDateUI(upDateSteps);
+            }
+        }catch (Exception e){
+            Log.d(TAG, "recoveryData: exception! ");
+            stepsItemModel = new StepsItemModel(0,0,0);
+        }
+    }
 
     /**
      *  更新 UI
@@ -250,37 +285,5 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
             }
         }
         callbackList.finishBroadcast();
-    }
-
-
-
-    /**
-     * 存储本次计步过程
-     */
-    private void tempSave(StepsItemModel stepsItemModel){
-        SharedPreferences.Editor editor = getSharedPreferences("tempStepsData",MODE_PRIVATE).edit();
-        editor.putInt("tempSteps",stepsItemModel.getSteps());
-        editor.putString("tempStartDate",stepsItemModel.getStartDate());
-        editor.putInt("tempMinutes",stepsItemModel.getMinutes());
-        editor.commit();
-    }
-
-    /**
-     * 恢复本次计步过程
-     */
-    private void recoveryTemp(){
-        //恢复本次计步过程
-        try {
-            SharedPreferences pref = getSharedPreferences("tempStepsData", MODE_PRIVATE);
-            stepsItemModel = new StepsItemModel(
-                    pref.getInt("tempSteps",0),
-                    pref.getString("tempStartDate","null"),
-                    pref.getInt("tempMinutes",0));
-            pref.edit().clear();//清除数据
-            Log.d(TAG, "recoveryData: success! ");
-        }catch (Exception e){
-            Log.d(TAG, "recoveryData: exception! ");
-            stepsItemModel = new StepsItemModel(0,"null",0);
-        }
     }
 }

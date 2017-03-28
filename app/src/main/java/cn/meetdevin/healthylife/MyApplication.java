@@ -1,4 +1,4 @@
-package cn.meetdevin.healthylife.config;
+package cn.meetdevin.healthylife;
 
 import android.app.Application;
 import android.content.Context;

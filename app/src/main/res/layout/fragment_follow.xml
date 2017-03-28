@@ -5,8 +5,9 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/showSteps_t"
+        android:id="@+id/textView"
         android:textSize="50dp"
+        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

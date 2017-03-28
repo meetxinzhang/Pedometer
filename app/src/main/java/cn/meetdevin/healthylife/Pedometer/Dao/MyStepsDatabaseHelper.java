@@ -1,10 +1,9 @@
-package cn.meetdevin.healthylife.Dao;
+package cn.meetdevin.healthylife.Pedometer.Dao;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-import android.widget.Toast;
 
 /**
  * Created by XinZh on 2017/3/8.
@@ -22,7 +21,7 @@ public class MyStepsDatabaseHelper extends SQLiteOpenHelper{
             + "id integer primary key autoincrement, "
             + "steps integer, "
             + "distance real, "
-            + "startDate text, "
+            + "startHour integer, "
             + "minutes integer)";
 
 

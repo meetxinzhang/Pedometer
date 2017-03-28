@@ -1,4 +1,4 @@
-package cn.meetdevin.healthylife.Dao;
+package cn.meetdevin.healthylife.Pedometer.Dao;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import cn.meetdevin.healthylife.Model.StepsItemModel;
-import cn.meetdevin.healthylife.Model.TodayStepsModel;
-import cn.meetdevin.healthylife.config.MyApplication;
+import cn.meetdevin.healthylife.Pedometer.Model.StepsItemModel;
+import cn.meetdevin.healthylife.Pedometer.Model.TodayStepsModel;
+import cn.meetdevin.healthylife.MyApplication;
 
 
 /**
@@ -64,10 +64,10 @@ public class StepsDBHandler {
                 // 遍历Cursor对象，取出数据
                 int steps = cursor.getInt(cursor.getColumnIndex("steps"));
                 //float distance = cursor.getFloat(cursor.getColumnIndex("distance"));
-                String startDate = cursor.getString(cursor.getColumnIndex("startDate"));
+                int startHour = cursor.getInt(cursor.getColumnIndex("startHour"));
                 int minutes = cursor.getInt(cursor.getColumnIndex("minutes"));
                 //初始化1
-                todayStepsModel.addStepsItem(new StepsItemModel(steps,startDate,minutes));
+                todayStepsModel.addStepsItem(new StepsItemModel(steps,startHour,minutes));
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -92,7 +92,7 @@ public class StepsDBHandler {
         // 开始组装第一条数据
         values.put("steps", stepsItemModel.getSteps());
         //values.put("distance", distance);
-        values.put("startDate",stepsItemModel.getStartDate());
+        values.put("startHour",stepsItemModel.getStartHour());
         values.put("minutes", stepsItemModel.getMinutes());
         database.insert("Today", null, values); // 插入第一条数据
         values.clear();
