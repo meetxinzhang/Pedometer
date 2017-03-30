@@ -14,6 +14,7 @@ import android.widget.TextView;
 import cn.meetdevin.healthylife.Pedometer.Dao.StepsDBHandler;
 import cn.meetdevin.healthylife.Pedometer.Model.TodayStepsModel;
 import cn.meetdevin.healthylife.R;
+import cn.meetdevin.mbarchartopenlib.MBarChartFrameLayout;
 
 /**
  * Created by XinZh on 2017/3/28.
@@ -26,14 +27,14 @@ public class FollowFragment extends Fragment implements PedometerActivity.OnActi
 
     TodayStepsModel todayStepsModel;
 
-    private TextView textView;
+    private TextView showSteps;
     Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what){
                 case STEPS_MESSAGE:
-                    textView.setText(msg.obj.toString());
+                    showSteps.setText(msg.obj.toString());
             }
         }
     };
@@ -58,7 +59,7 @@ public class FollowFragment extends Fragment implements PedometerActivity.OnActi
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_follow,container,false);
-        textView = (TextView) rootView.findViewById(R.id.textView);
+        showSteps = (TextView) rootView.findViewById(R.id.show_steps);
 
         return rootView;
     }

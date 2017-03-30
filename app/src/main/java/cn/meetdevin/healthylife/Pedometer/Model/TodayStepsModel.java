@@ -10,10 +10,10 @@ import java.util.List;
 public class TodayStepsModel {
     List<StepsItemModel> list;
 
-    int todayTotalSteps;
-    int todayTotalMinutes;
-    //date
-    int myDate[];
+    private int todayTotalSteps;
+    private int todayTotalMinutes;
+    //date 0-y 1-m 2-d
+    private int myDate[];
 
     public TodayStepsModel(int[] myDate ,int todayTotalSteps,int todayTotalMinutes){
         list = new ArrayList<>();

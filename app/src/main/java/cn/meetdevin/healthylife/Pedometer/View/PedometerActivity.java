@@ -82,8 +82,6 @@ public class PedometerActivity extends FragmentActivity {
         //当计步状态改变时，通知外部是否存储
         void onFinishStepsItem();
     }
-
-    //设置监听，传入回调对象
     public void setOnActivityChangeListener(
             OnActivityChangeListener onActivityChangeListener) {
         this.onActivityChangeListener = onActivityChangeListener;
