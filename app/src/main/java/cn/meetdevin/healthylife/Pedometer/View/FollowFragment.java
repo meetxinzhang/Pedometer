@@ -11,10 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import cn.meetdevin.healthylife.Pedometer.Dao.StepsDBHandler;
-import cn.meetdevin.healthylife.Pedometer.Model.TodayStepsModel;
+
+import java.util.List;
+
+import cn.meetdevin.healthylife.Pedometer.Presenter.DataIntegration;
 import cn.meetdevin.healthylife.R;
-import cn.meetdevin.mbarchartopenlib.MBarChartFrameLayout;
+import cn.meetdevin.mbarchartopenlib.DataMod;
 
 /**
  * Created by XinZh on 2017/3/28.
@@ -23,9 +25,10 @@ import cn.meetdevin.mbarchartopenlib.MBarChartFrameLayout;
 public class FollowFragment extends Fragment implements PedometerActivity.OnActivityChangeListener{
     private final String TAG = "FollowFragment";
     private static final String ARG_POSITION = "position";
-    final int STEPS_MESSAGE = 7;
+    private final int STEPS_MESSAGE = 7;
 
-    TodayStepsModel todayStepsModel;
+    private List<DataMod> list;
+    private int formerTotalSteps;
 
     private TextView showSteps;
     Handler handler = new Handler(){
@@ -71,14 +74,16 @@ public class FollowFragment extends Fragment implements PedometerActivity.OnActi
      */
     @Override
     public void onStepsChange(int steps) {
-        Log.d(TAG, "onStepsChange: "+steps +"zg:"+todayStepsModel.getTodayTotalSteps());
-        upDateSteps(steps + todayStepsModel.getTodayTotalSteps());
+        Log.d(TAG, "onStepsChange: "+steps +"zg:"+formerTotalSteps);
+        upDateSteps(steps + formerTotalSteps);
     }
     @Override
     public void onFinishStepsItem() {
         //从数据库获取更新
-        StepsDBHandler stepsDBHandler = new StepsDBHandler();
-        todayStepsModel = stepsDBHandler.getTodaySteps();
+        list = DataIntegration.getTodayData();
+        for (int i=0;i<list.size();i++){
+            formerTotalSteps += list.get(i).getVal();
+        }
     }
 
 

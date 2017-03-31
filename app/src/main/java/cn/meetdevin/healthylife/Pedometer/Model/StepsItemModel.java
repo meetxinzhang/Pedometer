@@ -5,23 +5,23 @@ package cn.meetdevin.healthylife.Pedometer.Model;
  */
 
 public class StepsItemModel {
-    private int steps;
+    private int year;
+    private int month;
+    private int day;
     private int startHour;
     private int minutes;
+    private int steps;
     private float distance;
 
-    public StepsItemModel(int totalSteps,int startHour, int totalMinutes){
+    public StepsItemModel(int year,int month,int day,int startHour, int minutes,int steps){
+        this.year = year;
+        this.month = month;
+        this.day = day;
         this.startHour = startHour;
-        this.steps = totalSteps;
-        this.minutes = totalMinutes;
+        this.minutes = minutes;
+        this.steps = steps;
     }
 
-    public StepsItemModel(int totalSteps, int startHour, int totalMinutes, int distance){
-        this.startHour = startHour;
-        this.steps = totalSteps;
-        this.minutes = totalMinutes;
-        this.distance = distance;
-    }
 
     public float getDistance() {
         return distance;
@@ -55,9 +55,37 @@ public class StepsItemModel {
         this.startHour = startHour;
     }
 
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public void setDay(int day) {
+        this.day = day;
+    }
+
+    public void setMonth(int month) {
+        this.month = month;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public int getMonth() {
+        return month;
+    }
+
+    public int getDay() {
+        return day;
+    }
+
     public void clean(){
-        this.steps = 0;
-        this.minutes = 0;
+        this.year = 0;
+        this.month = 0;
+        this.day = 0;
         this.startHour = 0;
+        this.minutes = 0;
+        this.steps = 0;
+        this.distance = 0;
     }
 }

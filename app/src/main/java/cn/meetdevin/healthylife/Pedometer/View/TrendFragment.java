@@ -7,14 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import cn.meetdevin.healthylife.Pedometer.Dao.StepsDBHandler;
-import cn.meetdevin.healthylife.Pedometer.Model.TodayStepsModel;
-import cn.meetdevin.healthylife.Pedometer.Presenter.TrendAnalysis;
+import cn.meetdevin.healthylife.Pedometer.Presenter.DataIntegration;
 import cn.meetdevin.healthylife.R;
-import cn.meetdevin.mbarchartopenlib.DataMod;
 import cn.meetdevin.mbarchartopenlib.MBarChartFrameLayout;
 
 /**
@@ -40,7 +34,7 @@ public class TrendFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_trend,container,false);
         mBarChartFrameLayout = (MBarChartFrameLayout) rootView.findViewById(R.id.bar_chart);
-        mBarChartFrameLayout.setData(TrendAnalysis.getFormerData());
+        mBarChartFrameLayout.setData(DataIntegration.getFormerData());
 
         return rootView;
     }

@@ -8,12 +8,14 @@ public class DataMod {
     private int info1;
     private int info2;
     private int info3;
+    private int info4;
     private int val;
 
-    public DataMod(int info1,int info2,int info3,int val){
+    public DataMod(int info1,int info2,int info3,int info4,int val){
         this.info1 = info1;
         this.info2 = info2;
         this.info3 = info3;
+        this.info4 = info4;
         this.val = val;
     }
 
@@ -48,5 +50,13 @@ public class DataMod {
 
     public void setInfo3(int info3) {
         this.info3 = info3;
+    }
+
+    public void setInfo4(int info4) {
+        this.info4 = info4;
+    }
+
+    public int getInfo4() {
+        return info4;
     }
 }

@@ -10,19 +10,15 @@ import android.util.Log;
  */
 
 public class MyStepsDatabaseHelper extends SQLiteOpenHelper{
-    public static final String CREATE_TABLE_FORMERDAYS = "create table FormerDays ("
+    public static final String CREATE_TABLE_STEPSDATA= "create table StepsData ("
             + "id integer primary key autoincrement, "
-            + "date text, "
-            + "totalSteps integer, "
-            + "totalMinutes integer, "
-            + "totalDistance real)";
-
-    public static final String CREATE_TABLE_TODAY = "create table Today ("
-            + "id integer primary key autoincrement, "
-            + "steps integer, "
-            + "distance real, "
+            + "year integer, "
+            + "month integer, "
+            + "day integer, "
             + "startHour integer, "
-            + "minutes integer)";
+            + "minutes integer, "
+            + "steps integer, "
+            + "distance real)";
 
 
     public MyStepsDatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
@@ -32,15 +28,13 @@ public class MyStepsDatabaseHelper extends SQLiteOpenHelper{
     @Override
     public void onCreate(SQLiteDatabase db) {
         //创建表
-        db.execSQL(CREATE_TABLE_FORMERDAYS);
-        db.execSQL(CREATE_TABLE_TODAY);
+        db.execSQL(CREATE_TABLE_STEPSDATA);
         Log.d("MyStepsDatabaseHelper", "onCreate: 数据库创建成功");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("drop table if exists FormerDays");
-        db.execSQL("drop table if exists today");
+        db.execSQL("drop table if exists StepsData");
         onCreate(db);
     }
 }

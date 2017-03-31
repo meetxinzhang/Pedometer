@@ -22,6 +22,8 @@ public class MBarChartFrameLayout extends FrameLayout
         implements RViewAdapter.OnRecyclerViewItemClickListener{
 
     private final String TAG = "YourBarChartFrameLayout";
+    private static final int ignore = -1;
+
     RecyclerView recyclerView;
     TextView maxVal;
     TextView hafVal;
@@ -51,7 +53,7 @@ public class MBarChartFrameLayout extends FrameLayout
 
     public void setData(List<DataMod> list){
         //解离数据
-        rViewAdapter = new RViewAdapter(DataSeparate.eparatesWithMonth(list,0,0));
+        rViewAdapter = new RViewAdapter(DataSeparate.eparatesWithMonth(list,ignore,ignore));
 
         rViewAdapter.setOnRecyclerViewItemClickListener(this);
         // 创建一个线性布局管理器
