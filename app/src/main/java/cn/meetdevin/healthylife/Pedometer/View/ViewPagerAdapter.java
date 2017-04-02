@@ -9,10 +9,10 @@ import android.support.v4.app.FragmentPagerAdapter;
  */
 
 public class ViewPagerAdapter extends FragmentPagerAdapter {
-    final int PAGE_COUNT =2;
-    private String titles[]={"跟踪","趋势"} ;
+    final int PAGE_COUNT =3;
+    private String titles[]={"跟踪","趋势","奖励"} ;
 
-    public ViewPagerAdapter(FragmentManager fm, PedometerActivity pedometerActivity) {
+    public ViewPagerAdapter(FragmentManager fm) {
         super(fm);
     }
 
@@ -24,6 +24,8 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
                 return FollowFragment.newInstance(position);
             case 1:
                 return TrendFragment.newInstance(position);
+            case 2:
+                return RewardFragment.newInstance(position);
         }
         return null;
     }

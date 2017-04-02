@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.IBinder;
@@ -13,7 +12,6 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
-
 import java.util.Calendar;
 
 import cn.meetdevin.healthylife.Pedometer.Dao.StepsDBHandler;
@@ -41,8 +39,8 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
     private final int upDateSteps = 0;
     private final int upDateDB = 1;
 
-    private StepsItemModel stepsItemModel;//本次计步
-    //private TodayStepsModel todayStepsModel;//今日计步
+    private StepsItemModel stepsItemModel;//本次计步mod
+    //private int todayTotallySteps;//今日步数
     private long millis;//用于计算一次计步过程的持续时间
 
     private StepsDBHandler stepsDBHandler;
@@ -196,7 +194,7 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
             millis = System.currentTimeMillis();
             Calendar calendar = Calendar.getInstance();
             stepsItemModel.setYear(calendar.get(Calendar.YEAR));
-            stepsItemModel.setMonth(calendar.get(Calendar.MONTH));
+            stepsItemModel.setMonth(calendar.get(Calendar.MONTH)+1);
             stepsItemModel.setDay(calendar.get(Calendar.DAY_OF_MONTH));
             stepsItemModel.setStartHour(calendar.get(Calendar.HOUR_OF_DAY));
         }
@@ -204,7 +202,7 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
             //计步结束存储一次计步数据
             stepsDBHandler.insertStepsData(stepsItemModel);
             Log.d(TAG,"onPedometerStateChange: 记录了一次持续"+stepsItemModel.getMinutes()+"分钟的运动");
-
+            StepsDataSP.cleanTempSteps();
             stepsItemModel.clean();
             //通知UI更新今日数据
             upDateUI(upDateDB);
@@ -217,14 +215,14 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
      * 存储本次计步过程
      */
     private void tempSave(StepsItemModel stepsItemModel){
-        StepsDataSP.save(stepsItemModel);
+        StepsDataSP.tempSaveSteps(stepsItemModel);
     }
 
     /**
      * 恢复本次计步过程
      */
     private void recoveryTemp(){
-        stepsItemModel = StepsDataSP.recovery();
+        stepsItemModel = StepsDataSP.tempRecoverySteps();
         upDateUI(upDateSteps);
     }
 

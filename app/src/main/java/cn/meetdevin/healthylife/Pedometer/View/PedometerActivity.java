@@ -97,7 +97,7 @@ public class PedometerActivity extends FragmentActivity {
 
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         viewPager = (ViewPager) findViewById(R.id.viewPager);
-        viewPagerAdapter= new ViewPagerAdapter(getSupportFragmentManager(),this);
+        viewPagerAdapter= new ViewPagerAdapter(getSupportFragmentManager());
 
         viewPager.setAdapter(viewPagerAdapter);
         tabLayout.setupWithViewPager(viewPager);
@@ -115,7 +115,7 @@ public class PedometerActivity extends FragmentActivity {
     }
 
     //绑定远程服务
-    private void bindPedomaterService() {
+    public void bindPedomaterService() {
         Intent intent = new Intent(this, PedometerService.class);
         bindService(intent, connection, BIND_AUTO_CREATE);
         isBind = true;
@@ -123,7 +123,7 @@ public class PedometerActivity extends FragmentActivity {
     }
 
     //解绑远程服务
-    private void unBindPedomaterService() {
+    public void unBindPedomaterService() {
         if (isBind) {
             unbindService(connection);
             try {

@@ -10,6 +10,7 @@
         android:text="返回"
         android:textSize="@dimen/text"
         android:textColor="@color/selectedTextColor"
+        android:background="@color/colorPrimary"
         android:layout_gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />

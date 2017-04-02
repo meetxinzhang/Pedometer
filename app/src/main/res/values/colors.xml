@@ -3,6 +3,8 @@
     <color name="colorPrimary">#ffffff</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#ffffff</color>
-    <color name="selectedTextColor">#5dbe77</color>
+    <color name="selectedTextColor">#59cf7a</color>
+    <color name="selectedBackground">#7edcb3</color>
+    <color name="ripple">#99e7b5</color>
     <color name="colorText">#55000000</color>
 </resources>

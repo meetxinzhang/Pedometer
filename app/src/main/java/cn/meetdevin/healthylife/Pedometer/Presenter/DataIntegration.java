@@ -27,7 +27,7 @@ public class DataIntegration {
 
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
+        int month = calendar.get(Calendar.MONTH)+1;
         int day = calendar.get(Calendar.DAY_OF_MONTH);
 
         StepsDBHandler stepsDBHandler = new StepsDBHandler();
@@ -38,12 +38,12 @@ public class DataIntegration {
             for (i=0;i<todaySteps.size();i++) { //遍历List
                 StepsItemModel stepsItemModel = todaySteps.get(i);
                 if(stepsItemModel.getStartHour() == h){
-                    list.add(new DataMod(year,month,day,h,stepsItemModel.getSteps()));
+                    list.add(new DataMod(year,month,day,h,stepsItemModel.getMinutes(),stepsItemModel.getSteps()));
                     break;
                 }
             }
             if(i == todaySteps.size()){
-                list.add(new DataMod(year,month,day,h,0));
+                list.add(new DataMod(year,month,day,h,0,0));
             }
         }
         return list;
@@ -53,18 +53,19 @@ public class DataIntegration {
     private static List<DataMod> dataAndDateConformity(List<StepsItemModel> formerSteps){
         Calendar calendar = Calendar.getInstance();
         int yearOfNow = calendar.get(Calendar.YEAR);
-        int monthOfNow = calendar.get(Calendar.MONTH);
+        int monthOfNow = calendar.get(Calendar.MONTH)+1;
         int dayOfNow = calendar.get(Calendar.DAY_OF_MONTH);
 
         List<DataMod> list = new ArrayList<>();
 
         for (int y = yearOfNow; y>=2017; y--){ //遍历年
 
-            for (int m = monthOfNow; m >=1; m--){ //遍历月
+            for (int m = monthOfNow; m>=1; m--){ //遍历月
 
-                for (int d = dayOfNow;d >=1;d--){ //遍历日
+                for (int d = dayOfNow; d>=1; d--){ //遍历日
                     int i;
                     int steps = 0;
+                    int minutes = 0;
                     for (i=0;i<formerSteps.size();i++){ //遍历 List
                         StepsItemModel stepsItemModel = formerSteps.get(i);
                         if(stepsItemModel.getYear() == y
@@ -72,9 +73,10 @@ public class DataIntegration {
                                 && stepsItemModel.getDay() == d){
 
                             steps += stepsItemModel.getSteps();
+                            minutes += stepsItemModel.getMinutes();
                         }
                     }
-                    list.add(new DataMod(y,m,d,ignore,steps));
+                    list.add(new DataMod(y,m,d,ignore,minutes,steps));
                 }
                 monthOfNow --;
                 dayOfNow = getDayCountOfMonth(yearOfNow,monthOfNow);

@@ -5,58 +5,68 @@ package cn.meetdevin.mbarchartopenlib;
  */
 
 public class DataMod {
-    private int info1;
-    private int info2;
-    private int info3;
-    private int info4;
+    private String year;
+    private String month;
+    private String day;
+    private int startHour;
+    private int mintues;
     private int val;
 
-    public DataMod(int info1,int info2,int info3,int info4,int val){
-        this.info1 = info1;
-        this.info2 = info2;
-        this.info3 = info3;
-        this.info4 = info4;
+    public DataMod(int year,int month,int day,int startHour,int mintues,int val){
+        this.year = String.valueOf(year);
+        this.month = String.valueOf(month);
+        this.day = String.valueOf(day);
+        this.startHour = startHour;
+        this.mintues = mintues;
         this.val = val;
     }
 
-
-    public int getInfo1() {
-        return info1;
+    public void setMonth(String month) {
+        this.month = month;
     }
 
-    public int getVal() {
-        return val;
+    public void setDay(String day) {
+        this.day = day;
     }
 
-    public int getInfo2() {
-        return info2;
+    public void setYear(String year) {
+        this.year = year;
     }
 
-    public int getInfo3() {
-        return info3;
+    public void setMintues(int mintues) {
+        this.mintues = mintues;
+    }
+
+    public void setStartHour(int startHour) {
+        this.startHour = startHour;
     }
 
     public void setVal(int val) {
         this.val = val;
     }
 
-    public void setInfo1(int info1) {
-        this.info1 = info1;
+    public int getMintues() {
+        return mintues;
     }
 
-    public void setInfo2(int info2) {
-        this.info2 = info2;
+    public int getStartHour() {
+        return startHour;
     }
 
-    public void setInfo3(int info3) {
-        this.info3 = info3;
+    public int getVal() {
+        return val;
     }
 
-    public void setInfo4(int info4) {
-        this.info4 = info4;
+    public String getDay() {
+        return day;
     }
 
-    public int getInfo4() {
-        return info4;
+    public String getMonth() {
+        return month;
+    }
+
+    public String getYear() {
+        return year;
     }
 }
+

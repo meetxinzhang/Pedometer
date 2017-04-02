@@ -15,12 +15,17 @@ import java.util.List;
 
 public class RViewAdapter extends RecyclerView.Adapter <RViewAdapter.ViewHolder> {
     private final String TAG = "RViewAdapter";
+    private static final int show_day = 3;
+    private static final int show_startHour = 4;
+
     private List<DataMod> list;
+    private int flag;
     private int max;
 
 
-    public RViewAdapter(List<DataMod> list) {
+    public RViewAdapter(List<DataMod> list,int flag) {
         this.list = list;
+        this.flag = flag;
         max = findMax();
     }
 
@@ -38,7 +43,15 @@ public class RViewAdapter extends RecyclerView.Adapter <RViewAdapter.ViewHolder>
         DataMod dataMod = list.get(position);
         holder.progressBar.setMax(max);
         holder.progressBar.setProgress(dataMod.getVal());
-        holder.textView.setText(String.valueOf(dataMod.getInfo3()));
+        switch (flag){
+            case show_day:
+                holder.textView.setText(String.valueOf(dataMod.getDay()));
+                break;
+            case show_startHour:
+                holder.textView.setText(String.valueOf(dataMod.getStartHour()));
+                break;
+        }
+
 
     }
 
@@ -63,7 +76,7 @@ public class RViewAdapter extends RecyclerView.Adapter <RViewAdapter.ViewHolder>
         @Override
         public void onClick(View v) {
             DataMod dataMod = list.get(getPosition());
-            onRecyclerViewItemClickListener.onRvItemClick(getPosition(),dataMod.getInfo1(),dataMod.getVal());
+            onRecyclerViewItemClickListener.onRvItemClick(getPosition(),dataMod.getVal());
         }
     }
 
@@ -71,7 +84,7 @@ public class RViewAdapter extends RecyclerView.Adapter <RViewAdapter.ViewHolder>
     OnRecyclerViewItemClickListener onRecyclerViewItemClickListener;
 
     public static interface OnRecyclerViewItemClickListener {
-        void onRvItemClick(int position,int info, int val);
+        void onRvItemClick(int position, int val);
     }
 
     //模仿ListView的设置监听对象方法

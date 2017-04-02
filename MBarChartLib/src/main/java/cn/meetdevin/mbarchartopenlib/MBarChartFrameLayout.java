@@ -23,6 +23,9 @@ public class MBarChartFrameLayout extends FrameLayout
 
     private final String TAG = "YourBarChartFrameLayout";
     private static final int ignore = -1;
+    private static final int month_unit = 30;
+    private static final int day_unit = 1;
+    private static final int week_unit = 7;
 
     RecyclerView recyclerView;
     TextView maxVal;
@@ -51,9 +54,9 @@ public class MBarChartFrameLayout extends FrameLayout
         linearSnapHelper.attachToRecyclerView(recyclerView);
     }
 
-    public void setData(List<DataMod> list){
-        //解离数据
-        rViewAdapter = new RViewAdapter(DataSeparate.eparatesWithMonth(list,ignore,ignore));
+    public void setData(List<DataMod> list,int flag){
+        //统计数据
+        rViewAdapter = new RViewAdapter(StatisticalData.statisticalDataWithUnit(list,day_unit),flag);
 
         rViewAdapter.setOnRecyclerViewItemClickListener(this);
         // 创建一个线性布局管理器
@@ -68,7 +71,7 @@ public class MBarChartFrameLayout extends FrameLayout
     }
 
     @Override
-    public void onRvItemClick(int position,int info,int val) {
+    public void onRvItemClick(int position,int val) {
         Log.d(TAG, "onRvItemClick: " + position);
         recyclerView.scrollToPosition(position);
     }

@@ -11,7 +11,6 @@ public class StepsItemModel {
     private int startHour;
     private int minutes;
     private int steps;
-    private float distance;
 
     public StepsItemModel(int year,int month,int day,int startHour, int minutes,int steps){
         this.year = year;
@@ -23,9 +22,6 @@ public class StepsItemModel {
     }
 
 
-    public float getDistance() {
-        return distance;
-    }
 
     public int getMinutes() {
         return minutes;
@@ -33,10 +29,6 @@ public class StepsItemModel {
 
     public int getSteps() {
         return steps;
-    }
-
-    public void setDistance(float distance) {
-        this.distance = distance;
     }
 
     public void setMinutes(int minutes) {
@@ -86,6 +78,5 @@ public class StepsItemModel {
         this.startHour = 0;
         this.minutes = 0;
         this.steps = 0;
-        this.distance = 0;
     }
 }

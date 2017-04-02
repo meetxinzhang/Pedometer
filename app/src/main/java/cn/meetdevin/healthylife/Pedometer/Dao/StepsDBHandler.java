@@ -4,9 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-
 import cn.meetdevin.healthylife.Pedometer.Model.StepsItemModel;
 import cn.meetdevin.healthylife.MyApplication;
 
