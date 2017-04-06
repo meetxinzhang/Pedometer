@@ -17,7 +17,7 @@ import cn.meetdevin.healthylife.R;
  * Created by XinZh on 2017/4/2.
  */
 
-public class RewardFragment extends Fragment{
+public class RewardFragment extends Fragment implements PedometerActivity.OnActivityChangeListener{
     private static final String ARG_POSITION = "position";
 
     private TextView showCompleteCount;
@@ -61,4 +61,12 @@ public class RewardFragment extends Fragment{
         }
 
     }
+
+    @Override
+    public void onStepsChange(int stepsOfThisTime, int stepsOfToady, int minutesOfToady, int lastRecorder) {
+        showRecorder.setText(String.valueOf(lastRecorder));
+        showRecorderDate.setText("今天|正在进行，加油！");
+    }
+    @Override
+    public void onFinishStepsItem() {}
 }

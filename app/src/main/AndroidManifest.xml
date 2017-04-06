@@ -17,8 +17,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity android:name=".Pedometer.View.PedometerActivity"></activity>
+        <activity android:name=".Pedometer.View.SettingActivity"></activity>
 
         <service android:name=".Pedometer.Presenter.PedometerService"
             android:process=":remote"

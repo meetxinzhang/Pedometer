@@ -3,6 +3,7 @@ package cn.meetdevin.healthylife.Pedometer.Presenter;
 import java.util.ArrayList;
 import java.util.List;
 import cn.meetdevin.healthylife.Pedometer.Dao.StepsDataSP;
+import cn.meetdevin.healthylife.Pedometer.Model.StepsItemModel;
 import cn.meetdevin.mbarchartopenlib.DataMod;
 
 /**
@@ -23,8 +24,4 @@ public class RewardAnalysis {
         return newList;
     }
 
-    public static int findTheMostTimes(){
-
-        return 0;
-    }
 }

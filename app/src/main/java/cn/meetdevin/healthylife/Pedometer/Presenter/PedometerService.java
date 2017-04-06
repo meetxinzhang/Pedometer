@@ -1,24 +1,33 @@
 package cn.meetdevin.healthylife.Pedometer.Presenter;
 
 import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import java.util.Calendar;
+import java.util.List;
 
+import cn.meetdevin.healthylife.MyApplication;
 import cn.meetdevin.healthylife.Pedometer.Dao.StepsDBHandler;
 import cn.meetdevin.healthylife.Pedometer.Dao.StepsDataSP;
 import cn.meetdevin.healthylife.Pedometer.Model.StepsItemModel;
+import cn.meetdevin.healthylife.Pedometer.View.PedometerActivity;
+import cn.meetdevin.healthylife.R;
 import cn.meetdevin.healthylife.RegisterCallback;
 import cn.meetdevin.healthylife.StepsChangeCallback;
+import cn.meetdevin.mbarchartopenlib.DataMod;
 
 /**
  * Remote Service
@@ -38,9 +47,14 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
     private final String TAG = "PedometerService";
     private final int upDateSteps = 0;
     private final int upDateDB = 1;
+    private boolean isNotify = false; // 是否发出了通知
 
     private StepsItemModel stepsItemModel;//本次计步mod
-    //private int todayTotallySteps;//今日步数
+    private List<DataMod> TodayDataList;
+    private int formerTotalSteps = 0;//今日往次步数
+    private int formerTotalMinutes = 0;//今日往次时间
+    private int lastRecorder;//上次的最高记录
+    private int goal;
     private long millis;//用于计算一次计步过程的持续时间
 
     private StepsDBHandler stepsDBHandler;
@@ -135,6 +149,17 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
         stepsDBHandler = new StepsDBHandler();
         recoveryTemp();
 
+        formerTotalSteps = 0;
+        formerTotalMinutes = 0;
+        TodayDataList = DataIntegration.getTodayData();
+        for (int i=0;i<TodayDataList.size();i++){
+            formerTotalSteps += TodayDataList.get(i).getVal();
+            formerTotalMinutes += TodayDataList.get(i).getMintues();
+        }
+
+        lastRecorder = StepsDataSP.getRecorder();
+        goal = StepsDataSP.getGoal();
+
         //发送定时广播唤醒自己
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         int anHour = 3*60*1000; //3分钟毫秒数
@@ -181,7 +206,24 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
         stepsItemModel.setSteps(steps);
         tempSave(stepsItemModel);
 
-        Log.d(TAG,"steps: "+steps + "time: "+ d);
+        //判断是否破记录
+        if(steps + formerTotalSteps >= lastRecorder){
+            lastRecorder = steps + formerTotalSteps;
+            Calendar calendar = Calendar.getInstance();
+            StepsDataSP.setRecorder(steps + formerTotalSteps,
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH)+1,
+                    calendar.get(Calendar.DAY_OF_MONTH));
+        }
+        //判断是否实现目标
+        if(!isNotify){
+            if(steps + formerTotalSteps >= goal){
+                sendNotify("今天的步行目标已实现！","做的不错！继续努力","目标已实现！");
+            }
+            isNotify = true;
+        }
+
+        Log.d(TAG,"steps: "+steps + "time: "+ d +"m");
         upDateUI(upDateSteps);
     }
 
@@ -201,6 +243,14 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
         if(pedometerState == 0){
             //计步结束存储一次计步数据
             stepsDBHandler.insertStepsData(stepsItemModel);
+
+            TodayDataList = DataIntegration.getTodayData();
+            formerTotalSteps = 0;
+            formerTotalMinutes = 0;
+            for (int i=0;i<TodayDataList.size();i++){
+                formerTotalSteps += TodayDataList.get(i).getVal();
+                formerTotalMinutes += TodayDataList.get(i).getMintues();
+            }
             Log.d(TAG,"onPedometerStateChange: 记录了一次持续"+stepsItemModel.getMinutes()+"分钟的运动");
             StepsDataSP.cleanTempSteps();
             stepsItemModel.clean();
@@ -237,7 +287,10 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
             try {
                 switch (flag){
                     case upDateSteps:
-                        callbackList.getBroadcastItem(i).onStepsChange(stepsItemModel.getSteps());
+                        callbackList.getBroadcastItem(i).onStepsChange(stepsItemModel.getSteps(),
+                                stepsItemModel.getSteps() + formerTotalSteps,
+                                stepsItemModel.getMinutes() + formerTotalMinutes,
+                                lastRecorder);
                         break;
                     case upDateDB:
                         callbackList.getBroadcastItem(i).onFinishStepsItem();
@@ -248,5 +301,28 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
             }
         }
         callbackList.finishBroadcast();
+    }
+
+    private void sendNotify(String contentTitle, String contentText,String ticker){
+        NotificationManager manager = (NotificationManager)
+                getSystemService(NOTIFICATION_SERVICE);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(MyApplication.getContext());
+        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setContentTitle(contentTitle);//设置通知栏标题
+        builder.setContentText(contentText);
+        builder.setTicker(ticker);
+        builder.setWhen(System.currentTimeMillis());//通知产生的时间，系统获取到的时间
+        builder.setDefaults(Notification.DEFAULT_VIBRATE);//向通知添加声音、闪灯和振动效果的最简单、最一致的方式是使用当前的用户默认设置，使用defaults属性，可以组合
+        builder.setPriority(Notification.PRIORITY_DEFAULT); //设置该通知优先级
+        builder.setOngoing(false);//ture，设置他为一个正在进行的通知。他们通常是用来表示一个后台任务,用户积极参与(如播放音乐)或以某种方式正在等待,因此占用设备(如一个文件下载,同步操作,主动网络连接)
+        Intent intent = new Intent(this,PedometerActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        builder.setContentIntent(pendingIntent);
+        manager.notify(1,builder.build());
+    }
+
+    public static void stopService(){
+        stopService();
     }
 }

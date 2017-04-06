@@ -37,8 +37,8 @@ public class PedometerActivity extends FragmentActivity {
     //服务控制客户端的回调接口
     private StepsChangeCallback callback = new StepsChangeCallback.Stub() {
         @Override
-        public void onStepsChange(int steps) throws RemoteException {
-            onActivityChangeListener.onStepsChange(steps);
+        public void onStepsChange(int stepsOfThisTime,int stepsOfToady,int minutesOfToady,int lastRecorder) throws RemoteException {
+            onActivityChangeListener.onStepsChange(stepsOfThisTime, stepsOfToady, minutesOfToady, lastRecorder);
         }
         @Override
         public void onFinishStepsItem() throws RemoteException {
@@ -78,7 +78,7 @@ public class PedometerActivity extends FragmentActivity {
 
     public interface OnActivityChangeListener {
         //当步数改变时,通知外部更新UI
-        void onStepsChange(int steps);
+        void onStepsChange(int stepsOfThisTime,int stepsOfToady,int minutesOfToady,int lastRecorder);
         //当计步状态改变时，通知外部是否存储
         void onFinishStepsItem();
     }
@@ -142,5 +142,4 @@ public class PedometerActivity extends FragmentActivity {
         Intent intent = new Intent(context, PedometerActivity.class);
         context.startActivity(intent);
     }
-
 }
