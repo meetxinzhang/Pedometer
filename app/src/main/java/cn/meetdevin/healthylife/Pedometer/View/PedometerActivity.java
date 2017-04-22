@@ -95,8 +95,8 @@ public class PedometerActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pedometer);
 
-        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
-        viewPager = (ViewPager) findViewById(R.id.viewPager);
+        tabLayout = (TabLayout) findViewById(R.id.tabLayout_pedometer);
+        viewPager = (ViewPager) findViewById(R.id.viewPager_pedometer);
         viewPagerAdapter= new ViewPagerAdapter(getSupportFragmentManager());
 
         viewPager.setAdapter(viewPagerAdapter);

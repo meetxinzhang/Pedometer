@@ -21,11 +21,11 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
         switch (position) {
             // Open FragmentTab1.java
             case 0:
-                return FollowFragment.newInstance(position);
+                return StepsFollowFragment.newInstance(position);
             case 1:
-                return TrendFragment.newInstance(position);
+                return StepsTrendFragment.newInstance(position);
             case 2:
-                return RewardFragment.newInstance(position);
+                return StepsRewardFragment.newInstance(position);
         }
         return null;
     }

@@ -17,6 +17,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+
+    signingConfigs {
+        release {
+            storeFile file('healthylife_KeyStore.jks')
+            storePassword '6863505'
+            keyAlias 'key0'
+            keyPassword '6863505'
+        }
+    }
 }
 
 dependencies {
