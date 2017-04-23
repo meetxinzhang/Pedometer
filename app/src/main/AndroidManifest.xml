@@ -34,7 +34,7 @@
         </activity>
         <activity android:name=".Pedometer.View.PedometerActivity"></activity>
         <activity android:name=".Pedometer.View.SettingActivity"></activity>
-        <activity android:name=".Running.RunningActivity"></activity>
+        <activity android:name=".Running.View.RunningActivity"></activity>
 
         <service android:name=".Pedometer.Presenter.PedometerService"
             android:process=":remote"

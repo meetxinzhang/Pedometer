@@ -11,7 +11,8 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.widget.Toast;
 
-import cn.meetdevin.healthylife.Pedometer.View.PedometerActivity;
+import com.baidu.location.BDLocation;
+
 import cn.meetdevin.healthylife.R;
 import cn.meetdevin.healthylife.Running.Presenter.GetLocation;
 
@@ -19,7 +20,7 @@ import cn.meetdevin.healthylife.Running.Presenter.GetLocation;
  * Created by XinZh on 2017/4/22.
  */
 
-public class RunningActivity extends FragmentActivity{
+public class RunningActivity extends FragmentActivity implements GetLocation.OnPositionChangeListener{
     private final String TAG = "RunningActivity";
 
     //Properties
@@ -53,7 +54,7 @@ public class RunningActivity extends FragmentActivity{
     }
 
     /**
-     * 对权限申请返回值的处理
+     * 运行时 权限申请返回值的处理
      * @param requestCode
      * @param permissions
      * @param grantResults
@@ -81,9 +82,31 @@ public class RunningActivity extends FragmentActivity{
         }
     }
 
+    /*
+     GetLocation.OnPositionChangeListener 中定义的方法
+     调用接口传递即时位置信息给 fragment
+     */
+    @Override
+    public void onPositionChange(BDLocation bdLocation) {
+        onRunningDataChangeListener.onRunningLocationChange(bdLocation);
+    }
+
+
+    //自定义接口，给 Fragment 传递即时信息
+    OnRunningDataChangeListener onRunningDataChangeListener;
+    public interface OnRunningDataChangeListener {
+        void onRunningStepsChange(int steps,int minutes);
+        void onRunningLocationChange(BDLocation bdLocation);
+    }
+    public void setOnRunningDataChangeListener(OnRunningDataChangeListener onRunningDataChangeListener){
+        this.onRunningDataChangeListener = onRunningDataChangeListener;
+    }
+
     //此activity的启动方法
     public static void actionStart(Context context) {
         Intent intent = new Intent(context, RunningActivity.class);
         context.startActivity(intent);
     }
+
+
 }

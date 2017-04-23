@@ -3,6 +3,8 @@ package cn.meetdevin.healthylife.Pedometer.Dao;
 import android.content.SharedPreferences;
 
 
+import java.util.Calendar;
+
 import cn.meetdevin.healthylife.MyApplication;
 import cn.meetdevin.healthylife.Pedometer.Model.StepsItemModel;
 
@@ -28,16 +30,32 @@ public class StepsDataSP {
 
         public static StepsItemModel tempRecoverySteps() {
             SharedPreferences pref = MyApplication.getContext().getSharedPreferences("tempStepsData", MODE_PRIVATE);
-            StepsItemModel stepsItemModel = new StepsItemModel(
-                    pref.getInt("tempYear",0),
-                    pref.getInt("tempMonth",0),
-                    pref.getInt("tempDay",0),
-                    pref.getInt("tempStartHour",0),
-                    pref.getInt("tempMinutes",0),
-                    pref.getInt("tempSteps",0));
+            Calendar calendar = Calendar.getInstance();
 
+            int year = pref.getInt("tempYear",0);
+            int month = pref.getInt("tempMonth",0);
+            int day = pref.getInt("tempDay",0);
+
+            int yearNow = calendar.get(Calendar.YEAR);
+            int monthNow = calendar.get(Calendar.MONTH)+1;
+            int dayNow = calendar.get(Calendar.DAY_OF_MONTH);
+
+            StepsItemModel stepsItemModel;
+            if(year == yearNow && month == monthNow && day == dayNow){
+                stepsItemModel = new StepsItemModel(
+                        year,
+                        month,
+                        day,
+                        pref.getInt("tempStartHour",-1),
+                        pref.getInt("tempMinutes",0),
+                        pref.getInt("tempSteps",0));
+            }else {
+                stepsItemModel = new StepsItemModel(yearNow,monthNow,dayNow,-1,0,0);
+                cleanTempSteps();
+            }
             return stepsItemModel;
         }
+
         public static void cleanTempSteps(){
             SharedPreferences.Editor editor = MyApplication.getContext().getSharedPreferences("tempStepsData", MODE_PRIVATE).edit();
             editor.clear();
