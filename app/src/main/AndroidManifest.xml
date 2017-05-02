@@ -43,6 +43,9 @@
                 <action android:name="cn.meetdevin.healthylife.PedometerService"/>
             </intent-filter>
         </service>
+        <service android:name=".Running.Presenter.RunningService"
+            android:enabled="true"
+            android:exported="true"></service>
         <service android:name="com.baidu.location.f"
             android:enabled="true"
             android:process=":remote"></service>

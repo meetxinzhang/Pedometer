@@ -31,9 +31,20 @@ public class TitleLinearLayout extends LinearLayout implements View.OnClickListe
 
         switch (getRunningActivityName(context)){
             case "PedometerActivity":
-                textView.setText("计步");break;
+                textView.setText("计步");
+                back.setVisibility(VISIBLE);
+                setting.setVisibility(VISIBLE);
+                break;
             case "RunningActivity":
-                textView.setText("跑步");break;
+                textView.setText("跑步");
+                back.setVisibility(VISIBLE);
+                setting.setVisibility(GONE);
+                break;
+            case "MainActivity":
+                textView.setText("HealthyLife");
+                back.setVisibility(GONE);
+                setting.setVisibility(GONE);
+                break;
             default:
                 textView.setText("---");
                 break;

@@ -7,7 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import cn.meetdevin.healthylife.Pedometer.Presenter.DataIntegration;
+import cn.meetdevin.healthylife.Pedometer.Presenter.StepsDataIntegration;
 import cn.meetdevin.healthylife.R;
 import cn.meetdevin.mbarchartopenlib.MBarChartFrameLayout;
 
@@ -40,9 +40,10 @@ public class StepsTrendFragment extends Fragment{
         return rootView;
     }
 
+
     @Override
-    public void onStart() {
-        super.onStart();
-        mBarChartFrameLayout.setData(DataIntegration.getFormerData(),show_day);
+    public void onResume() {
+        super.onResume();
+        mBarChartFrameLayout.setData(StepsDataIntegration.getFormerData(),show_day);
     }
 }

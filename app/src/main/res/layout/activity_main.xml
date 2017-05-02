@@ -12,15 +12,20 @@
     tools:context=".MainActivity">
 
     <TextView
+        android:text="毕业设计"
+        android:textSize="@dimen/text"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:layout_height="wrap_content" />
     <Button
+        android:text="计步"
         android:id="@+id/gotoSteps_b"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     <Button
+        android:text="跑步"
         android:id="@+id/gotoRunning_b"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+
 </LinearLayout>

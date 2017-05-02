@@ -47,7 +47,8 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
     private final String TAG = "PedometerService";
     private final int upDateSteps = 0;
     private final int upDateDB = 1;
-    private boolean isNotify = false; // 是否发出了通知
+    private boolean isComplete = false;
+    private boolean isBreakRecorder = false;
 
     private StepsItemModel stepsItemModel;//本次计步mod
     private List<DataMod> TodayDataList;
@@ -151,7 +152,7 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
 
         formerTotalSteps = 0;
         formerTotalMinutes = 0;
-        TodayDataList = DataIntegration.getTodayData();
+        TodayDataList = StepsDataIntegration.getTodayData();
         for (int i=0;i<TodayDataList.size();i++){
             formerTotalSteps += TodayDataList.get(i).getVal();
             formerTotalMinutes += TodayDataList.get(i).getMintues();
@@ -168,7 +169,7 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
         PendingIntent pi = PendingIntent.getBroadcast(this, 0, intent1, 0);
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtTime, pi);
 
-        /**
+        /*
          * 如果service进程被kill掉，保留service的状态为开始状态，但不保留递送的intent对象。
          * 随后系统会尝试重新创建service，由于服务状态为开始状态，所以创建服务后一定会调用onStartCommand(Intent,int,int)方法。
          * 如果在此期间没有任何启动命令被传递到service，那么参数Intent将为null
@@ -207,20 +208,24 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
         tempSave(stepsItemModel);
 
         //判断是否破记录
-        if(steps + formerTotalSteps >= lastRecorder){
-            lastRecorder = steps + formerTotalSteps;
-            Calendar calendar = Calendar.getInstance();
-            StepsDataSP.setRecorder(steps + formerTotalSteps,
-                    calendar.get(Calendar.YEAR),
-                    calendar.get(Calendar.MONTH)+1,
-                    calendar.get(Calendar.DAY_OF_MONTH));
+        if(isBreakRecorder==false){
+            if(steps + formerTotalSteps >= lastRecorder){
+                lastRecorder = steps + formerTotalSteps;
+                Calendar calendar = Calendar.getInstance();
+                StepsDataSP.setRecorder(steps + formerTotalSteps,
+                        calendar.get(Calendar.YEAR),
+                        calendar.get(Calendar.MONTH)+1,
+                        calendar.get(Calendar.DAY_OF_MONTH));
+                sendNotify("新的步数记录！","新纪录："+lastRecorder+" 步","继续努力哦");
+            }
         }
+
         //判断是否实现目标
-        if(!isNotify){
+        if(isComplete==false){
             if(steps + formerTotalSteps >= goal){
                 sendNotify("今天的步行目标已实现！","做的不错！继续努力","目标已实现！");
             }
-            isNotify = true;
+            isComplete = true;
         }
 
         Log.d(TAG,"steps: "+steps + "time: "+ d +"m");
@@ -244,7 +249,7 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
             //计步结束存储一次计步数据
             stepsDBHandler.insertStepsData(stepsItemModel);
 
-            TodayDataList = DataIntegration.getTodayData();
+            TodayDataList = StepsDataIntegration.getTodayData();
             formerTotalSteps = 0;
             formerTotalMinutes = 0;
             for (int i=0;i<TodayDataList.size();i++){

@@ -26,7 +26,7 @@ public class GetLocation {
     private LocationClient locationClient;
 
     public GetLocation(RunningActivity runningActivity){
-        locationClient = new LocationClient(runningActivity);
+        locationClient = new LocationClient(MyApplication.getContext());
         locationClient.registerLocationListener(new MyLocationListener());
 
         setOnPositionChangeListener(runningActivity);//设置监听者
@@ -80,17 +80,7 @@ public class GetLocation {
     public class MyLocationListener implements BDLocationListener{
         @Override
         public void onReceiveLocation(BDLocation bdLocation ) {
-            StringBuilder currentPosition = new StringBuilder();
-            currentPosition.append("纬度：").append(bdLocation.getLatitude()).
-                    append("\n");
-            currentPosition.append("经度：").append(bdLocation.getLongitude()).
-                    append("\n");
-            currentPosition.append("定位方式：");
-            if (bdLocation.getLocType() == BDLocation.TypeGpsLocation){
-                currentPosition.append("GPS");
-            }else if (bdLocation.getLocType() == BDLocation.TypeNetWorkLocation){
-                currentPosition.append("网络");
-            }
+
             //调用接口传递给外部
             onPositionChangeListener.onPositionChange(bdLocation);
         }
@@ -99,6 +89,7 @@ public class GetLocation {
 
         }
     }
+
 
     //自定义接口
     OnPositionChangeListener onPositionChangeListener;

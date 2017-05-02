@@ -16,7 +16,7 @@ import java.util.List;
 
 import cn.meetdevin.healthylife.MyApplication;
 import cn.meetdevin.healthylife.Pedometer.Dao.StepsDataSP;
-import cn.meetdevin.healthylife.Pedometer.Presenter.DataIntegration;
+import cn.meetdevin.healthylife.Pedometer.Presenter.StepsDataIntegration;
 import cn.meetdevin.healthylife.R;
 import cn.meetdevin.mbarchartopenlib.DataMod;
 import cn.meetdevin.mbarchartopenlib.MBarChartFrameLayout;
@@ -118,7 +118,7 @@ public class StepsFollowFragment extends Fragment implements PedometerActivity.O
     @Override
     public void onFinishStepsItem() {
         //从数据库获取更新
-        list = DataIntegration.getTodayData();
+        list = StepsDataIntegration.getTodayData();
         simple_chart.setData(list,show_startHour);
     }
 

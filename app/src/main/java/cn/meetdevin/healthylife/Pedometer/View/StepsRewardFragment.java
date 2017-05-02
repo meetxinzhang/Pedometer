@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import cn.meetdevin.healthylife.Pedometer.Dao.StepsDataSP;
-import cn.meetdevin.healthylife.Pedometer.Presenter.RewardAnalysis;
+import cn.meetdevin.healthylife.Pedometer.Presenter.StepsRewardAnalysis;
 import cn.meetdevin.healthylife.R;
 
 
@@ -44,12 +44,12 @@ public class StepsRewardFragment extends Fragment implements PedometerActivity.O
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        if(RewardAnalysis.getCompleteList().size()==0){
+    public void onResume() {
+        super.onResume();
+        if(StepsRewardAnalysis.getCompleteList().size()==0){
             showCompleteCount.setText("还未实现目标，继续努力！");
         }else {
-            showCompleteCount.setText("总次数"+RewardAnalysis.getCompleteList().size());
+            showCompleteCount.setText("总次数"+ StepsRewardAnalysis.getCompleteList().size());
         }
 
         showRecorder.setText("步数："+StepsDataSP.getRecorder());
@@ -59,13 +59,15 @@ public class StepsRewardFragment extends Fragment implements PedometerActivity.O
         }else {
             showRecorderDate.setText("无记录，继续努力！");
         }
-
     }
+
 
     @Override
     public void onStepsChange(int stepsOfThisTime, int stepsOfToady, int minutesOfToady, int lastRecorder) {
-        showRecorder.setText(String.valueOf(lastRecorder));
-        showRecorderDate.setText("今天|正在进行，加油！");
+        if(stepsOfToady == lastRecorder){
+            showRecorder.setText(String.valueOf(lastRecorder));
+            showRecorderDate.setText("今天-正在进行");
+        }
     }
     @Override
     public void onFinishStepsItem() {}
