@@ -7,11 +7,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.Calendar;
 import java.util.List;
 
 import cn.meetdevin.healthylife.MyApplication;
@@ -32,6 +34,8 @@ public class StepsFollowFragment extends Fragment implements PedometerActivity.O
     private static final String ARG_POSITION = "position";
     private static final int show_startHour = 4;
     private final int STEPS_MESSAGE = 7;
+
+    private static final int ignore = -1;
 
     private List<DataMod> list;
     int stepsOfThisTime;
@@ -78,7 +82,7 @@ public class StepsFollowFragment extends Fragment implements PedometerActivity.O
         showSteps = (TextView) rootView.findViewById(R.id.show_steps);
         minutesSteps = (TextView) rootView.findViewById(R.id.minutes_steps);
         goal_steps = (TextView) rootView.findViewById(R.id.goal_steps);
-        simple_chart = (MBarChartFrameLayout) rootView.findViewById(R.id.simple_chart);
+        simple_chart = (MBarChartFrameLayout) rootView.findViewById(R.id.simple_chart_show_today);
 
         return rootView;
     }
@@ -114,11 +118,13 @@ public class StepsFollowFragment extends Fragment implements PedometerActivity.O
         upDateSteps(stepsOfThisTime,stepsOfToady,minutesOfToady);
     }
 
-
     @Override
     public void onFinishStepsItem() {
         //从数据库获取更新
-        list = StepsDataIntegration.getTodayData();
+        list = StepsDataIntegration.getTodayData(ignore,ignore,ignore);
+        //获取屏幕宽度
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        simple_chart.setScreenSize(dm.widthPixels);
         simple_chart.setData(list,show_startHour);
     }
 

@@ -59,4 +59,10 @@
         android:scrollbars="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+    <TextView
+        android:text="|"
+        android:gravity="center"
+        android:layout_gravity="bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </FrameLayout>

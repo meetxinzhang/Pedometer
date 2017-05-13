@@ -174,6 +174,4 @@ public class RunningActivity extends FragmentActivity implements RunningService.
         Intent intent = new Intent(context, RunningActivity.class);
         context.startActivity(intent);
     }
-
-
 }

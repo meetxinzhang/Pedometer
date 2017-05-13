@@ -22,13 +22,15 @@ public class StepsDataIntegration {
     }
 
 
-    public static List<DataMod> getTodayData(){
+    public static List<DataMod> getTodayData(int year,int month,int day){
         List<DataMod> list = new ArrayList<>();
 
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH)+1;
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        if(year == ignore||month == ignore||day==ignore){
+            Calendar calendar = Calendar.getInstance();
+             year = calendar.get(Calendar.YEAR);
+             month = calendar.get(Calendar.MONTH)+1;
+             day = calendar.get(Calendar.DAY_OF_MONTH);
+        }
 
         StepsDBHandler stepsDBHandler = new StepsDBHandler();
         List<StepsItemModel> todaySteps = stepsDBHandler.queryStepsData(year,month,day);

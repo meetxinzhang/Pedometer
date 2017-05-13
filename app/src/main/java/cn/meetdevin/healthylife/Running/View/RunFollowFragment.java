@@ -41,6 +41,8 @@ public class RunFollowFragment extends Fragment implements RunningActivity.OnRun
     private final String TAG = "RunFollowFragment";
     private static final String ARG_POSITION = "position";
     private final int TIME_MESSAGE = 7;
+    private final int LOACTION_MESSAGE = 8;
+
     private boolean isFirstOnResume = true;
 //    Timing timing = new Timing(this);
 
@@ -75,6 +77,9 @@ public class RunFollowFragment extends Fragment implements RunningActivity.OnRun
             switch (msg.what){
                 case TIME_MESSAGE:
                     show_running_time.setText(msg.arg1+":"+msg.arg2+":"+msg.obj+" ");
+                    break;
+                case LOACTION_MESSAGE:
+                    show_position.setText(msg.obj.toString());
                     break;
                 default:
                     break;
@@ -134,9 +139,17 @@ public class RunFollowFragment extends Fragment implements RunningActivity.OnRun
     @Override
     public void onResume() {
         super.onResume();
+        if(isStartOrSuspend == true){
+            before_Run_view.setVisibility(View.VISIBLE);
+            when_startRun_view.setVisibility(View.GONE);
+        }else {
+            before_Run_view.setVisibility(View.GONE);
+            when_startRun_view.setVisibility(View.VISIBLE);
+            start_or_suspend_run.setText("暂停");
+        }
         show_set_run_time_goal.setText(RunningDataSP.getRunningTimeGoal()+" 分钟");
         show_running_time_goal.setText(RunningDataSP.getRunningTimeGoal()+" 分钟");
-        if(!isFirstOnResume){
+        if(isFirstOnResume==false){
             runningActivity.timingControlBinder.requestUI();
         }
         isFirstOnResume = false;
@@ -157,7 +170,6 @@ public class RunFollowFragment extends Fragment implements RunningActivity.OnRun
         super.onDestroy();
         mapView.onDestroy();
     }
-
 
     @Override
     public void onRunningLocationChange(BDLocation bdLocation) {
@@ -181,8 +193,8 @@ public class RunFollowFragment extends Fragment implements RunningActivity.OnRun
             }else if (bdLocation.getLocType() == BDLocation.TypeNetWorkLocation){
                 currentPosition.append("网络");
             }
-            show_position.setText(currentPosition.toString());
 
+            upDateLocationUI(currentPosition.toString());
             isFirstLocate = false;
         }
     }
@@ -244,7 +256,8 @@ public class RunFollowFragment extends Fragment implements RunningActivity.OnRun
                 break;
             case R.id.stop_run:
                 //停止跑步服务
-                runningActivity.unBindRunningService();
+                runningActivity.timingControlBinder.stopSer();
+//                runningActivity.unBindRunningService();
 //                timing.onSuspend();
                 isStartOrSuspend = true;
                 start_or_suspend_run.setText("开始");
@@ -262,6 +275,12 @@ public class RunFollowFragment extends Fragment implements RunningActivity.OnRun
         msg.arg1 = hour;
         msg.arg2 = minute;
         msg.obj = second;
+        handler.sendMessage(msg);
+    }
+    private void upDateLocationUI(String location){
+        Message msg = new Message();
+        msg.what = LOACTION_MESSAGE;
+        msg.obj = location;
         handler.sendMessage(msg);
     }
 }

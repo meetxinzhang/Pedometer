@@ -67,6 +67,20 @@ public class RunningService extends Service{
             Log.d(TAG, "requestUI: rrRrrr");
             onRunningServiceChangeListener.onRunningSecondChange(hour,minute,second);
         }
+        public void stopSer(){
+            isRunning = false;
+
+            if(isBreakRecorder==true){
+                RunningDataSP.setRunningTimeRecorder(hour,minute,second,
+                        runningItemModel.getYear(),runningItemModel.getMonth(),runningItemModel.getDay());
+            }
+            runningDBHandler.insertRunningData(runningItemModel);
+            hour= 0;
+            minute = 0;
+            second = 0;
+            runningItemModel.clean();
+            stopSelf();
+        }
         public void setListener(OnRunningServiceChangeListener onRunningServiceChangeListener){
             setOnRunningServiceChangeListener(onRunningServiceChangeListener);
         }
@@ -125,13 +139,15 @@ public class RunningService extends Service{
                             }
                         }
                         if(isBreakRecorder==false){
-                            if(hour>=hourRecorder){
-                                if(minute>=minuteRecorder){
+                            if(hour>hourRecorder){
+                                isBreakRecorder = true;
+                            }else if(hour == hourRecorder){
+                                if(minute>minuteRecorder){
+                                    isBreakRecorder = true;
+                                }else if(minute == minuteRecorder){
                                     if(second>=secondRecorder){
                                         isBreakRecorder = true;
                                         sendNotify("新的跑步记录！","持续时间："+hour+":"+minute+":"+second,"继续努力哦");
-                                        RunningDataSP.setRunningTimeRecorder(hour,minute,second,
-                                                runningItemModel.getYear(),runningItemModel.getMonth(),runningItemModel.getDay());
                                     }
                                 }
                             }
@@ -171,7 +187,8 @@ public class RunningService extends Service{
     @Override
     public void onDestroy() {
         super.onDestroy();
-        runningDBHandler.insertRunningData(runningItemModel);
+        timeControlBinder.stopSer();
+//        runningDBHandler.insertRunningData(runningItemModel);
     }
 
     private void sendNotify(String contentTitle, String contentText,String ticker){

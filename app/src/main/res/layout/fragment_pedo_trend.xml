@@ -3,16 +3,54 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <TextView
+        android:text="日视图"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
     <cn.meetdevin.mbarchartopenlib.MBarChartFrameLayout
-        android:id="@+id/bar_chart"
+        android:id="@+id/bar_chart_show_trend"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
     </cn.meetdevin.mbarchartopenlib.MBarChartFrameLayout>
 
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="@dimen/padding"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="2017/1/1"
+            android:textSize="@dimen/text"
+            android:id="@+id/pedo_trend_show_date"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:text="1164步"
+            android:textSize="@dimen/text"
+            android:id="@+id/pedo_trend_show_steps"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:text="30分钟"
+            android:textSize="@dimen/text"
+            android:id="@+id/pedo_trend_show_mintues"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
     <TextView
+        android:text="小时视图"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <cn.meetdevin.mbarchartopenlib.MBarChartFrameLayout
+        android:id="@+id/bar_chart_show_day"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
-
+        android:layout_weight="1">
+    </cn.meetdevin.mbarchartopenlib.MBarChartFrameLayout>
 </LinearLayout>

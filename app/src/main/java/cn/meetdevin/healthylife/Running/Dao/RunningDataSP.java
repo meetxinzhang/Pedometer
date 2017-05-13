@@ -34,10 +34,11 @@ public class RunningDataSP {
         }
         public static int[] getRunningTimeRecorder(){
             SharedPreferences pref = MyApplication.getContext().getSharedPreferences("RunningData", MODE_PRIVATE);
-            int hour = pref.getInt("hour",0);
-            int minute = pref.getInt("minute",0);
-            int second = pref.getInt("second",0);
-            return new int[]{hour,minute,second};
+            int[] recorder = new int[3];
+            recorder[0] = pref.getInt("hour",0);
+            recorder[1] = pref.getInt("minute",0);
+            recorder[2] = pref.getInt("second",0);
+            return recorder;
         }
         public static int[] getRunningTimeRecorderDate(){
             SharedPreferences pref = MyApplication.getContext().getSharedPreferences("RunningData", MODE_PRIVATE);
@@ -58,7 +59,5 @@ public class RunningDataSP {
             editor.putInt("second",second);
             editor.commit();
         }
-
-
 
 }

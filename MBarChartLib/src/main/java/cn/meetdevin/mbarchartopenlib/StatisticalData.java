@@ -36,23 +36,27 @@ public class StatisticalData {
     }
 
     private static List<DataMod> withDay(List<DataMod> oldList){
+        List<DataMod> newlist = new ArrayList<>();
+
         for (int i=0;i<oldList.size();i++){
             DataMod dataMod = oldList.get(i);
-            if(dataMod.getDay().equals("1")){
-                dataMod.setDay(dataMod.getMonth()+"/1");
-            }
+            newlist.add(dataMod);
+//            if(dataMod.getDay().equals("1")){
+//                dataMod.setDay(dataMod.getMonth()+"/1");
+//            }
         }
-        return oldList;
+
+        return newlist;
     }
 
     private static List<DataMod> withMonth(List<DataMod> oldList){
-        List<DataMod> newList = new ArrayList<>();
-        return newList;
+
+        return oldList;
     }
 
     private static List<DataMod> withWeek(List<DataMod> oldList){
-        List<DataMod> newList = new ArrayList<>();
-        return newList;
+
+        return oldList;
     }
 
 

@@ -50,6 +50,8 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
     private boolean isComplete = false;
     private boolean isBreakRecorder = false;
 
+    private static final int ignore = -1;
+
     private StepsItemModel stepsItemModel;//本次计步mod
     private List<DataMod> TodayDataList;
     private int formerTotalSteps = 0;//今日往次步数
@@ -152,7 +154,7 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
 
         formerTotalSteps = 0;
         formerTotalMinutes = 0;
-        TodayDataList = StepsDataIntegration.getTodayData();
+        TodayDataList = StepsDataIntegration.getTodayData(ignore,ignore,ignore);
         for (int i=0;i<TodayDataList.size();i++){
             formerTotalSteps += TodayDataList.get(i).getVal();
             formerTotalMinutes += TodayDataList.get(i).getMintues();
@@ -211,6 +213,7 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
         if(isBreakRecorder==false){
             if(steps + formerTotalSteps >= lastRecorder){
                 lastRecorder = steps + formerTotalSteps;
+                isBreakRecorder = true;
                 Calendar calendar = Calendar.getInstance();
                 StepsDataSP.setRecorder(steps + formerTotalSteps,
                         calendar.get(Calendar.YEAR),
@@ -249,7 +252,7 @@ public class PedometerService extends Service implements MyStepDcretor.OnSensorC
             //计步结束存储一次计步数据
             stepsDBHandler.insertStepsData(stepsItemModel);
 
-            TodayDataList = StepsDataIntegration.getTodayData();
+            TodayDataList = StepsDataIntegration.getTodayData(ignore,ignore,ignore);
             formerTotalSteps = 0;
             formerTotalMinutes = 0;
             for (int i=0;i<TodayDataList.size();i++){
