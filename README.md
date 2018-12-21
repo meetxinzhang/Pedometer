@@ -1,4 +1,4 @@
-# healthylife
+# Pedometer
 本科毕业设计
 
 写了一个 Android 平台上的计步算法
